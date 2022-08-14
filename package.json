@@ -1,4 +1,15 @@
 {
+  "name": "altv-esbuild-rust-wasm",
+  "version": "0.0.0",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*",
+    "text-encoder/**/*"
+  ],
+  "repository": "https://github.com/xxshady/altv-esbuild-rust-wasm",
+  "author": "xshady",
+  "license": "MIT",
   "devDependencies": {
     "@altv/types-client": "^2.3.0",
     "@altv/types-natives": "^1.4.5",
@@ -18,20 +29,9 @@
   },
   "scripts": {
     "dev": "node --es-module-specifier-resolution=node build-src/plugin -dev",
-    "build": "concurrently 'npm:build-*' -c 'blue.bold,magenta.bold,cyan.bold'",
-    "publ": "yarn build && yarn docs && yarn publish",
+    "build": "node --es-module-specifier-resolution=node build-src/plugin",
+    "publ": "yarn build yarn publish",
     "types": "dts-bundle-generator -o dist/main.d.ts --inline-declare-externals src/main.ts"
   },
-  "name": "altv-esbuild-rust-wasm",
-  "version": "0.2.0",
-  "main": "dist/main.js",
-  "types": "dist/main.d.ts",
-  "files": [
-    "dist/**/*",
-    "text-encoder/**/*"
-  ],
-  "repository": "https://github.com/xxshady/altv-esbuild-rust-wasm",
-  "author": "xshady",
-  "license": "MIT",
   "type": "module"
 }
