@@ -40,7 +40,6 @@ const {
   // these values are imported to rust using:
   // #[wasm_bindgen(js_namespace = altv_imports)]
   // (see example resource)
-  // wasm-bindgen documention: 
   ...wasmImports, 
 })
 ```
