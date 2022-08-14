@@ -1,0 +1,37 @@
+{
+  "devDependencies": {
+    "@altv/types-client": "^2.3.0",
+    "@altv/types-natives": "^1.4.5",
+    "@altv/types-server": "^2.4.3",
+    "@altv/types-shared": "^1.2.7",
+    "@types/node": "^18.0.6",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "dts-bundle-generator": "^6.12.0",
+    "esbuild": "^0.14.49",
+    "eslint": "^7.30.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "dev": "node --es-module-specifier-resolution=node build-src/plugin -dev",
+    "build": "concurrently 'npm:build-*' -c 'blue.bold,magenta.bold,cyan.bold'",
+    "publ": "yarn build && yarn docs && yarn publish",
+    "types": "dts-bundle-generator -o dist/main.d.ts --inline-declare-externals src/main.ts"
+  },
+  "name": "altv-esbuild-rust-wasm",
+  "version": "0.2.0",
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*",
+    "text-encoder/**/*"
+  ],
+  "repository": "https://github.com/xxshady/altv-esbuild-rust-wasm",
+  "author": "xshady",
+  "license": "MIT",
+  "type": "module"
+}

@@ -1,0 +1,5 @@
+dist
+node_modules
+dist.js
+pkg
+target
