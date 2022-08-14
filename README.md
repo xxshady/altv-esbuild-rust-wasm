@@ -30,6 +30,7 @@ esbuild.build({
 ### Usage in JS code
 
 ```js
+// generated .wasm file must be in the folder with generated .js file (see example resource)
 import loadWasm from "./pkg/example.wasm"
 
 const {
