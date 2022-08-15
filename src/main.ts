@@ -38,12 +38,6 @@ export const altvEsbuildRustWasm = (): esbuild.Plugin => {
           .replace("(function() {", "")
           .replace("})();", "")
 
-        console.log(
-          userPath,
-          wasmPath,
-          jsFilePath,
-        )
-
         return {
           contents: `
             function base64ToArrayBuffer(base64) {
