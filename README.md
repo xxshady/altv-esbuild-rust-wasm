@@ -6,7 +6,7 @@ Requirement for building rust to wasm is installed [wasm-pack](https://rustwasm.
 
 ## How to use?
 
-Example resource: [link](/example/README.md).
+Example resource: [link](/example/).
 
 ### Install package via npm
 
