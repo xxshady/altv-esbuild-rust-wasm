@@ -1,5 +1,6 @@
 # How to try it?
 
+* `npm i`
 * `npm run build-wasm`
 * `npm run build-js`
 * Add this folder as resource to your server
