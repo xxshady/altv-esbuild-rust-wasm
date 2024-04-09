@@ -8,3 +8,4 @@ const { call_rust_wasm } = loadWasm({
 })
 
 call_rust_wasm()
+alt.log('from JS Hello, alt:V!🤩🤯🥶😱')

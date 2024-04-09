@@ -1,0 +1,6 @@
+type = 'jsv2'
+main = 'dist.js'
+client-main = 'dist.js'
+
+[js-module-v2]
+compatibilityEnabled = true
