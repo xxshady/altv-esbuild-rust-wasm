@@ -28,8 +28,8 @@
     "typescript": "^4.7.4"
   },
   "scripts": {
-    "dev": "node --es-module-specifier-resolution=node build-src/plugin -dev",
-    "build": "node --es-module-specifier-resolution=node build-src/plugin",
+    "dev": "node build-src/plugin -dev",
+    "build": "node build-src/plugin",
     "publ": "yarn build && yarn publish",
     "types": "dts-bundle-generator -o dist/main.d.ts --inline-declare-externals src/main.ts"
   },

@@ -1,6 +1,6 @@
 import esbuild from "esbuild"
-import * as shared from "./shared"
-import { typesGenerator } from "./types-generator"
+import * as shared from "./shared.js"
+import { typesGenerator } from "./types-generator.js"
 
 const watch = shared.ESBUILD_OPTIONS.watch && {
   onRebuild: typesGenerator()
