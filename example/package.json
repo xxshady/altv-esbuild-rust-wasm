@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "altv-esbuild-rust-wasm": "latest",
+    "altv-esbuild-rust-wasm": "file:../",
     "esbuild": "=0.15.3"
   },
   "type": "module"
