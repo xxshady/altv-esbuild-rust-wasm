@@ -71,8 +71,6 @@ export const altvEsbuildRustWasm = (): esbuild.Plugin => {
               return result;
             }
 
-            ${textEncoderPolyfill}
-
             const wasmLoader = (altv_imports) => {
               // ------- jsFileContent
               ${jsFileContent}
