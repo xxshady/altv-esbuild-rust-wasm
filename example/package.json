@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "altv-esbuild-rust-wasm": "latest",
-    "esbuild": "^0.15.3"
+    "esbuild": "=0.15.3"
   },
   "type": "module"
 }
