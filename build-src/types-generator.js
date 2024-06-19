@@ -12,7 +12,7 @@ export const typesGenerator = () =>
       typesGenerator.child.kill()
     }
 
-    const child = exec("yarn types")
+    const child = exec("npm run types")
     typesGenerator.child = child
 
     child.stdout.pipe(process.stdout)
