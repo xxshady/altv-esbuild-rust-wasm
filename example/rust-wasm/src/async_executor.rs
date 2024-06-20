@@ -31,9 +31,11 @@ impl Default for Executor {
     }
 }
 
-pub fn spawn_future<F>(future: F)
+pub fn spawn_local<F>(future: F)
 where
     F: Future<Output = ()> + 'static,
 {
-    EXECUTOR_INSTANCE.with_borrow(|executor| executor.spawner.spawn_local(future)).unwrap();
+    EXECUTOR_INSTANCE
+        .with_borrow(|executor| executor.spawner.spawn_local(future))
+        .unwrap();
 }

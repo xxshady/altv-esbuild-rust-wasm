@@ -5,7 +5,7 @@ use std::{
     time::Duration,
 };
 
-use async_executor::{spawn_future, EXECUTOR_INSTANCE};
+use async_executor::{spawn_local, EXECUTOR_INSTANCE};
 use timers::{set_timeout, TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
 use wasm_bindgen::prelude::*;
 use web_time::SystemTime;
@@ -23,7 +23,7 @@ extern "C" {
 pub fn call_rust_wasm() {
     log(&format!("Hello, alt:V! line: {}", line!()));
 
-    spawn_future(async {
+    spawn_local(async {
         start_loop(|tick| {
             let players = tick.all_players();
             dbg!(players);
@@ -68,13 +68,18 @@ pub fn call_rust_wasm() {
             let Some(player) = player else {
                 return;
             };
-            let maybe = player.get_maybe();
+            let player = player.detach_from_context();
 
-            spawn_future(async {
-                let Some(player) = maybe.into_player() else {
-                    return;
-                };
-                dbg!(player);
+            spawn_local(async move {
+                // TODO: i dont like it
+                player.use_if_exists(|player| {});
+                // use_context(|ctx| {
+                //     let Some(player) = player.attach_to_context(ctx) else {
+                //         return;
+                //     };j
+                //     dbg!(player);
+                //     // Some(player)
+                // });
             });
         });
 
@@ -155,19 +160,28 @@ impl EveryTickContext {
 struct Player {}
 
 impl Player {
-    fn get_maybe(&self) -> MaybePlayer {
-        MaybePlayer { ptr: todo!() }
+    fn detach_from_context(&self) -> DetachedPlayer {
+        DetachedPlayer { ptr: todo!() }
     }
 }
 
-struct MaybePlayer {
+struct DetachedPlayer {
     ptr: usize,
 }
 
-impl MaybePlayer {
+impl DetachedPlayer {
     /// Returns player if it exists
-    fn into_player(self) -> Option<Player> {
-        todo!()
+    fn attach_to_context<'ctx>(&self, context: &'ctx impl ThisTick) -> Option<&'ctx Player> {
+        context.attach_player(self)
+    }
+
+    fn use_if_exists<R>(&self, use_it: impl FnOnce(&Player) -> R) -> Option<R> {
+        use_context(|ctx| {
+            let Some(player) = self.attach_to_context(ctx) else {
+                return None;
+            };
+            Some(use_it(player))
+        })
     }
 }
 
@@ -187,7 +201,7 @@ fn on_server(_event_name: &str, _handler: impl FnMut(&OnServerEventContext) + 's
     todo!()
 }
 
-trait ThisTickApi {
+trait ThisTick {
     fn all_players(&self) -> &[Player] {
         todo!()
     }
@@ -195,12 +209,17 @@ trait ThisTickApi {
     fn get_player_by_id(&self, _player_id: u32) -> Option<&Player> {
         todo!()
     }
+
+    fn attach_player<'ctx>(&'ctx self, player: &DetachedPlayer) -> Option<&'ctx Player> {
+        todo!()
+    }
 }
 
-impl ThisTickApi for EveryTickContext {}
-impl ThisTickApi for OnServerEventContext {}
-impl ThisTickApi for GameEntityCreateContext {}
-impl ThisTickApi for MainContext {}
+impl ThisTick for EveryTickContext {}
+impl ThisTick for OnServerEventContext {}
+impl ThisTick for GameEntityCreateContext {}
+impl ThisTick for MainContext {}
+impl ThisTick for StandaloneContext {}
 
 enum AnyEntity {}
 
@@ -213,3 +232,9 @@ fn on_game_entity_create(_handler: impl FnMut(&GameEntityCreateContext) + 'stati
 }
 
 struct MainContext {}
+
+struct StandaloneContext {}
+
+fn use_context<R>(use_it: impl FnOnce(&StandaloneContext) -> R) -> R {
+    use_it(&StandaloneContext {})
+}
