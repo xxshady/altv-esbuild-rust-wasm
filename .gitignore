@@ -1,6 +1,7 @@
 dist
 node_modules
 dist.js
-pkg
 target
-example/package-lock.json
+/example/rust-wasm/pkg
+/example/package-lock.json
+/example/rust-wasm/server

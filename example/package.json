@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-wasm": "cd rust-wasm && wasm-pack build --release --target no-modules",
+    "build-wasm": "cd rust-wasm && wasm-pack build --debug --target no-modules",
     "build-js": "node build.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "altv-esbuild": "^0.7.2",
     "altv-esbuild-rust-wasm": "file:../",
     "esbuild": "=0.15.3"
   },
