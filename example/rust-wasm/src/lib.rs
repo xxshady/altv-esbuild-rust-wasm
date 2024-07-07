@@ -1,6 +1,7 @@
-use async_executor::EXECUTOR_INSTANCE;
+use async_executor::{spawn_future, EXECUTOR_INSTANCE};
 use js_sys::{Function, Object, Reflect, Uint8Array, WebAssembly};
-use timers::{TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
+use timers::{set_timeout, TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
+use wait::wait;
 use wasm_bindgen::prelude::*;
 
 mod altv_events;
@@ -8,6 +9,7 @@ mod async_executor;
 mod logging;
 mod timers;
 mod wait;
+pub mod base_objects;
 
 #[wasm_bindgen(js_namespace = altv_imports)]
 extern "C" {
@@ -28,6 +30,35 @@ extern "C" {
 pub fn main() {
   console_error_panic_hook::set_once();
   log_info("start");
+
+  // let mut future = None;
+
+  // set_timeout(
+  //   move |context| {
+  //     let player = base_objects::player::Player::get_by_id(context, 123);
+  //     let player = player.unwrap();
+
+  //     future = Some(async {
+  //       log_info(&format!("player: {player:?}"));
+  //     });
+  //   },
+  //   web_time::Duration::from_secs(1),
+  // );
+
+  let future = async {
+    let player_name = crate::base_objects::scope::new_scope(|scope| {
+      let player = base_objects::player::Player::get_by_id(scope, 123);
+      // let's assume player with such id is valid on this tick
+      let player = player.unwrap();
+
+      // no need to hold reference to player instance if we only need data from it
+      player.name()
+    });
+    wait(web_time::Duration::from_secs(1)).await;
+    dbg!(player_name);
+  };
+
+  spawn_future(future);
 }
 
 #[wasm_bindgen]

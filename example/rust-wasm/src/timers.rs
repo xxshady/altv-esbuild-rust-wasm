@@ -161,19 +161,27 @@ impl Timer {
   }
 }
 
-pub fn set_timeout(callback: impl FnOnce() + 'static, duration: Duration) -> Timer {
+pub fn set_timeout(
+  callback: impl for<'context> FnOnce(&'context TimerContext) + 'static,
+  duration: Duration,
+) -> Timer {
   let mut callback = Some(callback);
   create_timer(
-    Box::new(move || (callback.take().unwrap())()),
+    Box::new(move || (callback.take().unwrap())(&TimerContext {})),
     duration.as_millis() as u64, // TODO: use Duration
     true,
   )
 }
 
-pub fn set_interval(mut callback: impl FnMut() + 'static, duration: Duration) -> Timer {
+pub fn set_interval(
+  mut callback: impl for<'context> FnMut(&'context TimerContext) + 'static,
+  duration: Duration,
+) -> Timer {
   create_timer(
-    Box::new(move || callback()),
+    Box::new(move || callback(&TimerContext {})),
     duration.as_millis() as u64, // TODO: use Duration
     false,
   )
 }
+
+pub struct TimerContext {}
