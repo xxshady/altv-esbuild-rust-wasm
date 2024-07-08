@@ -3,6 +3,56 @@
 Base objects that are not owned by current resource,
 for example remote players, vehicles
 
+## Problem
+
+```rust
+let player: Option<altv::Player> = altv::Player::get_by_id(123);
+altv::set_timeout(|| {
+  let name: ??? = player.name();
+}, Duration::from_secs(10));
+```
+
+What should `player.name()` return?
+
+- `String`: Then what happens if player will be disconnected at that time? should it panic?
+- `Result<String>`: Return `Result` from ANY method, if player disconnected - return `Err`
+
+It turns out there is another way
+
+```rust
+altv::new_scope(|scope| {
+  // `player` is attached to `scope` now
+  let player: Option<&altv::Player> = altv::Player::get_by_id(scope, 123);
+
+  altv::set_timeout(|| {
+    // compile time error, because `player` is attached to `scope`
+    // and scope is only valid in closure to which it is passed
+    let name: String = player.name();
+  }, Duration::from_secs(10));
+});
+```
+
+To use `player` again we need to detach it and attach to new scope
+
+```rust
+new_scope(|scope| {
+  // `player` is attached to `scope` now
+  let player: Option<&altv::Player> = altv::Player::get_by_id(scope, 123);
+  // "detaching" it
+  let detached_player = player.detach_from_scope();
+
+  altv::set_timeout(|scope| {
+    let Some(player) = detached_player.attach_to_scope(scope) else {
+      // player already disconnected
+      return;
+    };
+
+    // all calls to `player` are infallible here ✨
+    let name: String = player.name();
+  }, Duration::from_secs(10));
+});
+```
+
 ## Scopes
 
 "Scopes" are needed so that borrowed base objects cannot be used
@@ -11,40 +61,18 @@ One scope is equal to one tick (both serverside and clientside)<br>
 To use some borrowed base object (read something from it or call something on it)
 it needs to be attached to some scope
 
-```rust
-// `context` is Scope
-altv::set_timeout(|context| {
-  let player: Option<altv::Player> = altv::Player::get_by_id(
-    /* scope: */ context,
-    /* id: */ 123
-  );
-  // let's assume player with such id is valid on this tick
-  let player = player.unwrap();
-
-  altv::set_timeout(|_| {
-    // compile time error,
-    // this player was attached to `context` and
-    // may already be destroyed when this callback is called
-    dbg!(player);
-  }, Duration::from_secs(1));
-}, Duration::from_secs(1));
-```
-
 Scopes are passed into event callbacks, timer callbacks, everywhere
 
 ```rust
-// `context` is Scope
-altv::events::on_game_entity_create(|context| {
+altv::events::on_game_entity_create(|scope| {
 // ...
 });
 
-// `context` is Scope
-altv::events::on_net_owner_change(|context| {
+altv::events::on_net_owner_change(|scope| {
 // ...
 });
 
-// `context` is Scope
-altv::every_tick(|context| {
+altv::every_tick(|scope| {
 // ...
 });
 ```
@@ -64,7 +92,7 @@ let future = async {
 };
 ```
 
-For this use case it's possible to create new scope anywhere using [`new_scope`](super::scope::new_scope)
+In this case it's possible to create new scope anywhere using [`new_scope`](super::scope::new_scope)
 
 ```rust
 let future = async {
