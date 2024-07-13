@@ -15,7 +15,7 @@ altv::set_timeout(|| {
 What should `player.name()` return?
 
 - `String`: Then what happens if player will be disconnected at that time? should it panic?
-- `Result<String>`: Return `Result` from ANY method, if player disconnected - return `Err`
+- `Result<String>`: Return `Result` from ANY method, if player disconnected - return `Err` (that's currently what JS module does (both v1 and v2))
 
 It turns out there is another way
 
@@ -32,7 +32,9 @@ altv::new_scope(|scope| {
 });
 ```
 
-To use `player` again we need to detach it and attach to new scope
+When we need to use borrowed base object we attach it some scope (in other words one tick)
+
+To use `player` again we need to detach it (at this point we can't call any method on it) and attach to new scope
 
 ```rust
 new_scope(|scope| {
