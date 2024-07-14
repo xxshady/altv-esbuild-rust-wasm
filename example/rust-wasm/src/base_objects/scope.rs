@@ -1,3 +1,12 @@
+use std::any::Any;
+
+use super::{
+  any_instance::AnyBaseObject,
+  handle::BaseObjectHandle,
+  instance::{BaseObject},
+  manager::Manager,
+};
+
 /// Scope where "borrowed" base objects (for example Player or Vehicle) are guaranteed to be valid
 ///
 /// # Example
@@ -14,13 +23,21 @@
 ///   });
 /// });
 /// ```
-pub trait Scope {}
+#[derive(Default)]
+pub struct Scope {
+  base_objects: Vec<AnyBaseObject>,
+}
 
-impl Scope for crate::timers::TimerContext {}
-impl Scope for ThisTickScope {}
+impl Scope {
+  pub fn attach_base_object<'scope, T>(
+    &'scope mut self,
+    base_object: AnyBaseObject,
+  ) -> &'scope BaseObject<T> {
+    self.base_objects.push(base_object);
+    self.base_objects.last().unwrap().into()
+  }
+}
 
-struct ThisTickScope;
-
-pub fn new_scope<R>(use_scope: impl for<'scope> FnOnce(&'scope ThisTickScope) -> R) -> R {
-  use_scope(&ThisTickScope)
+pub fn new_scope<R>(use_scope: impl for<'scope> FnOnce(&'scope Scope) -> R) -> R {
+  use_scope(&Scope::default())
 }

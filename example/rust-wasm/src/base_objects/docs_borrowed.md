@@ -7,6 +7,9 @@ for example remote players, vehicles
 
 ```rust
 let player: Option<altv::Player> = altv::Player::get_by_id(123);
+// let's assume player with such id is valid on this tick
+let player: altv::Player = player.unwrap();
+
 altv::set_timeout(|| {
   let name: ??? = player.name();
 }, Duration::from_secs(10));
@@ -15,7 +18,19 @@ altv::set_timeout(|| {
 What should `player.name()` return?
 
 - `String`: Then what happens if player will be disconnected at that time? should it panic?
-- `Result<String>`: Return `Result` from ANY method, if player disconnected - return `Err` (that's currently what JS module does (both v1 and v2) with "invalid base object" exceptions)
+- `Result<String>`: Return `Result` from ANY method, if player disconnected - return `Err`
+
+`Result<String>` would be similar to what JS module does (both v1 and v2) with "invalid base object" exceptions
+
+```rust
+const player = alt.Player.getByID(123);
+alt.Utils.assert(player != null);
+
+alt.setTimeout(() => {
+  // string or invalid base object exception
+  const name = player.name();
+}, 10_000);
+```
 
 It turns out there is another way
 
@@ -23,6 +38,8 @@ It turns out there is another way
 altv::new_scope(|scope| {
   // `player` is attached to `scope` now
   let player: Option<&altv::Player> = altv::Player::get_by_id(scope, 123);
+  // let's assume player with such id is valid on this tick
+  let player: altv::Player = player.unwrap();
 
   altv::set_timeout(|| {
     // compile time error, because `player` is attached to `scope`
@@ -40,6 +57,8 @@ To use `player` again we need to detach it (at this point we can't call any meth
 new_scope(|scope| {
   // `player` is attached to `scope` now
   let player: Option<&altv::Player> = altv::Player::get_by_id(scope, 123);
+  // let's assume player with such id is valid on this tick
+  let player: altv::Player = player.unwrap();
   // "detaching" it
   let detached_player = player.detach_from_scope();
 
@@ -88,6 +107,9 @@ let future = async {
     /* scope: */ ???,
     /* id: */ 123
   );
+  // let's assume player with such id is valid on this tick
+  let player = player.unwrap();
+
   altv::wait(Duration::from_secs(1)).await;
   // ???
   dbg!(player.name());

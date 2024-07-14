@@ -24,7 +24,7 @@ use super::{player::Player, scope::Scope};
 pub struct DetachedPlayer {}
 
 impl DetachedPlayer {
-  pub fn attach_to_scope<'scope>(&self, scope: &'scope impl Scope) -> Option<&'scope Player> {
+  pub fn attach_to_scope<'scope>(&self, scope: &'scope Scope) -> Option<&'scope Player> {
     todo!()
   }
 }

@@ -20,9 +20,9 @@ pub fn wait(duration: Duration) -> impl Future {
 
     let waker = cx.waker().clone();
     set_timeout(
-      Box::new(|_| {
+      |_| {
         waker.wake();
-      }),
+      },
       duration,
     );
 

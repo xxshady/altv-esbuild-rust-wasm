@@ -6,12 +6,13 @@ use std::{
 
 use crate::{
   async_executor::spawn_future,
+  base_objects::handle::BaseObjectHandle,
   disable_altv_event, enable_altv_event,
   logging::{log, log_warn},
   wait::wait,
 };
 use serde::{Deserialize, Serialize};
-use serde_wasm_bindgen::{from_value, to_value};
+use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
 use web_time::Duration;
 
@@ -22,6 +23,8 @@ macro_rules! define_altv_events {
     pub enum EventType {
       $( $variant, )+
     }
+
+    const REQUIRED_EVENTS: &[EventType] = &[EventType::baseObjectCreate, EventType::baseObjectDestroy];
 
     #[derive(Serialize, Deserialize, Debug)]
     pub enum Event {
@@ -43,7 +46,7 @@ macro_rules! define_altv_events {
     }
 
     pub mod contexts {
-      use serde::{Deserialize, Serialize};
+      use super::*;
 
       $(
         #[derive(Debug, Serialize, Deserialize)]
@@ -88,6 +91,8 @@ define_altv_events!(
     pub name: String,
     pub args: Vec<String>,
   },
+  baseObjectCreate: { pub base_object: BaseObjectHandle },
+  baseObjectDestroy: { pub base_object: BaseObjectHandle },
 );
 
 #[wasm_bindgen]
@@ -146,7 +151,9 @@ pub fn remove_handler(handler_id: HandlerId) {
       };
 
       if handlers_map.is_empty() {
-        disable_altv_event(handler.event_name());
+        if !REQUIRED_EVENTS.contains(&handler.event_type()) {
+          disable_altv_event(handler.event_name());
+        }
         remove_map_of_type = Some(*event_type);
       }
 

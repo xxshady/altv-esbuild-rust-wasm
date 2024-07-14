@@ -2,3 +2,8 @@ pub mod scope;
 pub mod detached_player;
 pub mod player;
 pub mod docs_borrowed;
+pub mod manager;
+pub mod handle;
+pub mod base_object_type;
+pub mod instance;
+pub mod any_instance;

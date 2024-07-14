@@ -6,7 +6,7 @@ build({
   bundle: true,
   logLevel: "info",
   format: "esm",
-  entryPoints: ["./src.js"],
+  entryPoints: ["./js/main.js"],
   outfile: "./dist.js",
   external: [
     "alt-shared",

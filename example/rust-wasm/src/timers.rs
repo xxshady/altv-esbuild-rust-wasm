@@ -5,6 +5,8 @@ use std::{
 
 use web_time::{Duration, SystemTime};
 
+use crate::base_objects::scope::Scope;
+
 pub type TimerId = u64;
 pub type TimerCallback = dyn FnMut() + 'static;
 
@@ -167,7 +169,7 @@ pub fn set_timeout(
 ) -> Timer {
   let mut callback = Some(callback);
   create_timer(
-    Box::new(move || (callback.take().unwrap())(&TimerContext {})),
+    Box::new(move || (callback.take().unwrap())(&TimerContext::default())),
     duration.as_millis() as u64, // TODO: use Duration
     true,
   )
@@ -178,10 +180,10 @@ pub fn set_interval(
   duration: Duration,
 ) -> Timer {
   create_timer(
-    Box::new(move || callback(&TimerContext {})),
+    Box::new(move || callback(&TimerContext::default())),
     duration.as_millis() as u64, // TODO: use Duration
     false,
   )
 }
 
-pub struct TimerContext {}
+pub type TimerContext = Scope;
