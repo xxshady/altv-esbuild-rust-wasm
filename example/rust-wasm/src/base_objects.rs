@@ -7,3 +7,5 @@ pub mod handle;
 pub mod base_object_type;
 pub mod instance;
 pub mod any_instance;
+pub mod vehicle;
+pub mod scoped_instance;

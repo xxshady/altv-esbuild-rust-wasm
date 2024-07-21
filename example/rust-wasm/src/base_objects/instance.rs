@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::BaseObject as JsBaseObjectRef;
 
-use super::{handle::BaseObjectHandle, manager::Manager};
+use super::{any_instance::AnyBaseObject, handle::BaseObjectHandle, manager::Manager};
 
 pub struct BaseObject<T> {
   pub(crate) handle: BaseObjectHandle,

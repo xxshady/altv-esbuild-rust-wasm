@@ -1,13 +1,6 @@
-use super::{base_object_type::BaseObjectType, instance::BaseObject, player::Player};
+use super::{player::Player, vehicle::Vehicle};
 
 pub enum AnyBaseObject {
   Player(Player),
-}
-
-impl From<&AnyBaseObject> for &Player {
-  fn from<'a>(value: &'a AnyBaseObject) -> &'a Player {
-    match value {
-      AnyBaseObject::Player(player) => player,
-    }
-  }
+  Vehicle(Vehicle),
 }

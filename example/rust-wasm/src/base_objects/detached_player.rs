@@ -1,4 +1,9 @@
-use super::{player::Player, scope::Scope};
+use super::{
+  player::{Player, ScopedPlayer},
+  scope::Scope,
+};
+
+// TODO: add generic `DetachedBaseObject` or `UnscopedBaseObject` (see `ScopedBaseObject`)
 
 /// Player instance "detached" from [`scope`](super::scope::Scope),
 /// "detached" means it's not known whether its still valid or not
@@ -24,7 +29,7 @@ use super::{player::Player, scope::Scope};
 pub struct DetachedPlayer {}
 
 impl DetachedPlayer {
-  pub fn attach_to_scope<'scope>(&self, scope: &'scope Scope) -> Option<&'scope Player> {
+  pub fn attach_to_scope<'scope>(&self, scope: &'scope Scope) -> Option<ScopedPlayer<'scope>> {
     todo!()
   }
 }

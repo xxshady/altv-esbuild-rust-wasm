@@ -1,11 +1,4 @@
-use std::any::Any;
-
-use super::{
-  any_instance::AnyBaseObject,
-  handle::BaseObjectHandle,
-  instance::{BaseObject},
-  manager::Manager,
-};
+use super::{instance::BaseObject, scoped_instance::ScopedBaseObject};
 
 /// Scope where "borrowed" base objects (for example Player or Vehicle) are guaranteed to be valid
 ///
@@ -24,17 +17,14 @@ use super::{
 /// });
 /// ```
 #[derive(Default)]
-pub struct Scope {
-  base_objects: Vec<AnyBaseObject>,
-}
+pub struct Scope {}
 
 impl Scope {
   pub fn attach_base_object<'scope, T>(
-    &'scope mut self,
-    base_object: AnyBaseObject,
-  ) -> &'scope BaseObject<T> {
-    self.base_objects.push(base_object);
-    self.base_objects.last().unwrap().into()
+    &'scope self,
+    base_object: BaseObject<T>,
+  ) -> ScopedBaseObject<'scope, T> {
+    ScopedBaseObject::new(self, base_object)
   }
 }
 
