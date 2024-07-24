@@ -1,5 +1,5 @@
 pub mod scope;
-pub mod detached_player;
+pub mod unscoped_instance;
 pub mod player;
 pub mod docs_borrowed;
 pub mod manager;
