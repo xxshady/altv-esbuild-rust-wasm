@@ -4,13 +4,14 @@ use crate::BaseObject as JsBaseObjectRef;
 
 use super::{any_instance::AnyBaseObject, handle::BaseObjectHandle, manager::Manager};
 
-pub struct BaseObject<T> {
+#[derive(Clone)]
+pub struct BaseObject<T: Clone> {
   pub(crate) handle: BaseObjectHandle,
   _type: PhantomData<T>,
   js_ref: JsBaseObjectRef,
 }
 
-impl<T> BaseObject<T> {
+impl<T: Clone> BaseObject<T> {
   pub fn id(&self) -> u32 {
     self.js_ref.id()
   }

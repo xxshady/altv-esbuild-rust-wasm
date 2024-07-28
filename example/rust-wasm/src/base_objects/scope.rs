@@ -20,7 +20,7 @@ use super::{instance::BaseObject, scoped_instance::ScopedBaseObject};
 pub struct Scope {}
 
 impl Scope {
-  pub fn attach_base_object<'scope, T>(
+  pub fn attach_base_object<'scope, T: Clone>(
     &'scope self,
     base_object: BaseObject<T>,
   ) -> ScopedBaseObject<'scope, T> {

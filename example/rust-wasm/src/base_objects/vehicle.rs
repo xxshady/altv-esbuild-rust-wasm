@@ -1,9 +1,6 @@
-use super::{
-  any_instance::{AnyBaseObject},
-  instance::BaseObject,
-  scoped_instance::ScopedBaseObject,
-};
+use super::{instance::BaseObject, scoped_instance::ScopedBaseObject};
 
+#[derive(Clone)]
 pub struct VehicleType;
 
 pub type Vehicle = BaseObject<VehicleType>;

@@ -1,8 +1,11 @@
-use super::{instance::BaseObject, scope::Scope, scoped_instance::ScopedBaseObject};
+use super::{
+  instance::BaseObject, manager::MANAGER_INSTANCE, scope::Scope, scoped_instance::ScopedBaseObject,
+};
 
-/// Base object instance detached from [`scope`](super::scope::Scope),
-/// "unscoped" means it's not known whether its still valid or not
-/// so you can't do anything with this except [`attach`](Self::attach_to_scope) it again
+/// Detached base object instance, it's not known whether its still valid or not
+/// so you can't do anything with it except [`scope`](Self::scope) it again
+///
+/// The opposite of [`ScopedInstance`](super::scoped_instance::ScopedBaseObject).
 ///
 /// # Example
 ///
@@ -11,29 +14,33 @@ use super::{instance::BaseObject, scope::Scope, scoped_instance::ScopedBaseObjec
 ///   let altv::AnyEntity::Player(player) = context.entity {
 ///     return;
 ///   };
-///   let unscoped_player = player.detach_from_scope();
+///   let unscoped_player = player.unscope();
 ///   
 ///   altv::set_timeout(|context| {
-///     let Some(player) = unscoped_player.attach_to_scope(context) else {
+///     let Some(player) = unscoped_player.scope(context) else {
 ///       return;
 ///     };
 ///     dbg!(player);
 ///   }, Duration::from_secs(1));
 /// });
 /// ```
-pub struct UnscopedBaseObject<T> {
+pub struct UnscopedBaseObject<T: Clone> {
   instance: BaseObject<T>,
 }
 
-impl<T> UnscopedBaseObject<T> {
+impl<T: Clone> UnscopedBaseObject<T> {
   pub(crate) fn new(instance: BaseObject<T>) -> Self {
     Self { instance }
   }
 
-  pub fn attach_to_scope<'scope>(
-    &self,
-    scope: &'scope Scope,
-  ) -> Option<ScopedBaseObject<'scope, T>> {
-    todo!()
+  pub fn scope<'scope>(&self, scope: &'scope Scope) -> Option<ScopedBaseObject<'scope, T>> {
+    let valid =
+      MANAGER_INSTANCE.with_borrow(|manager| manager.is_handle_valid(&self.instance.handle));
+
+    if valid {
+      Some(scope.attach_base_object(self.instance.clone()))
+    } else {
+      None
+    }
   }
 }

@@ -1,11 +1,9 @@
-use std::ops::Deref;
-
 use super::{instance::BaseObject, scope::Scope, unscoped_instance::UnscopedBaseObject};
 
 // TODO: add Deref<Target = BaseObject<T>> for this?
 
-/// Base object instance attached from [`scope`](super::scope::Scope),
-/// "scoped" means it's attached to a scope and can only be used while that scope is alive.
+/// Base object instance attached to a [`scope`](super::scope::Scope)
+/// and can only be used while that scope is alive (in other words, *base object is owned by its scope*).
 ///
 /// The opposite of [`UnscopedInstance`](super::unscoped_instance::UnscopedBaseObject).
 ///
@@ -26,18 +24,20 @@ use super::{instance::BaseObject, scope::Scope, unscoped_instance::UnscopedBaseO
 ///   }, Duration::from_secs(1));
 /// });
 /// ```
-pub struct ScopedBaseObject<'scope, T> {
-  scope: &'scope Scope,
+pub struct ScopedBaseObject<'scope, T: Clone> {
+  _scope: &'scope Scope,
   instance: BaseObject<T>,
 }
 
-impl<'scope, T> ScopedBaseObject<'scope, T> {
+impl<'scope, T: Clone> ScopedBaseObject<'scope, T> {
   pub(crate) fn new(scope: &'scope Scope, instance: BaseObject<T>) -> Self {
-    Self { scope, instance }
+    Self {
+      _scope: scope,
+      instance,
+    }
   }
 
-  // TODO: change to &self and clone instance?
-  pub fn detach_from_scope(self) -> UnscopedBaseObject<T> {
-    UnscopedBaseObject::new(self.instance)
+  pub fn unscope(&self) -> UnscopedBaseObject<T> {
+    UnscopedBaseObject::new(self.instance.clone())
   }
 }

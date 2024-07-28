@@ -1,6 +1,6 @@
 {
   "rust-analyzer.linkedProjects": [
-    "example/rust-wasm/Cargo.toml"
+    "${workspaceFolder}/example/rust-wasm/Cargo.toml"
   ],
   "window.title": "vscode altv-esbuild-rust-wasm",
   "editor.tabSize": 2,

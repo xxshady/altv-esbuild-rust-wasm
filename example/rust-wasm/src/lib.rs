@@ -30,6 +30,7 @@ extern "C" {
   #[wasm_bindgen]
   fn get_base_object_ref(id: u32, btype: u8) -> Option<BaseObject>;
 
+  #[derive(Clone)]
   type BaseObject;
 
   #[wasm_bindgen(method, getter)]

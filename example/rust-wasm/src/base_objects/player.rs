@@ -8,6 +8,7 @@ use super::{
   scoped_instance::ScopedBaseObject,
 };
 
+#[derive(Clone)]
 pub struct PlayerType;
 
 pub type Player = BaseObject<PlayerType>;

@@ -36,13 +36,13 @@ It turns out there is another way
 
 ```rust
 altv::new_scope(|scope| {
-  // `player` is attached to `scope` now
+  // `player` is owned by `scope` now
   let player: Option<&altv::Player> = altv::Player::get_by_id(scope, 123);
   // let's assume player with such id is valid on this tick
   let player: altv::Player = player.unwrap();
 
   altv::set_timeout(|| {
-    // compile time error, because `player` is attached to `scope`
+    // compile time error, because `player` is owned by `scope`
     // and scope is only valid in closure to which it is passed
     let name: String = player.name();
   }, Duration::from_secs(10));
@@ -51,19 +51,19 @@ altv::new_scope(|scope| {
 
 When we need to use borrowed base object we attach it some scope (in other words one tick)
 
-To use `player` again we need to detach it (at this point we can't call any method on it) and attach to new scope
+To use `player` again we need to _unscope_ it (at this point we can't call any method on it) and attach to new scope
 
 ```rust
 new_scope(|scope| {
-  // `player` is attached to `scope` now
+  // `player` is owned by `scope` now
   let player: Option<&altv::Player> = altv::Player::get_by_id(scope, 123);
   // let's assume player with such id is valid on this tick
   let player: altv::Player = player.unwrap();
-  // "detaching" it
-  let detached_player = player.detach_from_scope();
+  // "unscoping" it
+  let unscoped_player = player.unscope();
 
   altv::set_timeout(|scope| {
-    let Some(player) = detached_player.attach_to_scope(scope) else {
+    let Some(player) = unscoped_player.scope(scope) else {
       // player already disconnected
       return;
     };
@@ -80,7 +80,7 @@ new_scope(|scope| {
 after destroy (invalid base objects)<br>
 One scope is equal to one tick (both serverside and clientside)<br>
 To use some borrowed base object (read something from it or call something on it)
-it needs to be attached to some scope
+it needs to be attached to some scope (in other words, scope becomes its temporary owner)
 
 Scopes are passed into event callbacks, timer callbacks, everywhere
 
@@ -136,22 +136,22 @@ let future = async {
 ```
 
 If you want to hold reference to base object for longer than one scope
-(one tick) there are detached base objects, for example [`DetachedPlayer`](super::detached_player::DetachedPlayer)
+(one tick) there are _unscoped_ base objects
 
 ```rust
 let future = async {
-  let detached_player = altv::new_scope(|scope| {
+  let unscoped_player = altv::new_scope(|scope| {
     let player = altv::Player::get_by_id(scope, 123);
     // let's assume player with such id is valid on this tick
     let player = player.unwrap();
 
-    player.detach_from_scope()
+    player.unscope()
   });
 
   altv::wait(Duration::from_secs(1)).await;
 
   altv::new_scope(|scope| {
-    let Some(player) = detached_player.attach_to_scope(scope) else {
+    let Some(player) = unscoped_player.scope(scope) else {
       // player was destroyed
       return;
     };
