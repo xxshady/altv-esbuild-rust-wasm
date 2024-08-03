@@ -5,6 +5,8 @@
   "window.title": "vscode altv-esbuild-rust-wasm",
   "editor.tabSize": 2,
   "[javascript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
-  }
+    "editor.defaultFormatter": "dprint.dprint",
+    "editor.formatOnSave": true
+  },
+  "dprint.path": "example/node_modules/@dprint/win32-x64/dprint.exe"
 }

@@ -1,4 +1,4 @@
-import alt from 'alt-shared'
+import alt from "alt-shared"
 
 export class Resource {
   exports = {}

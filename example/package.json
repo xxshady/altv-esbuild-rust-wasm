@@ -13,6 +13,7 @@
   "dependencies": {
     "altv-esbuild": "^0.7.2",
     "altv-esbuild-rust-wasm": "file:../",
+    "dprint": "^0.47.2",
     "esbuild": "=0.15.3"
   },
   "type": "module"

@@ -1,0 +1,23 @@
+{
+  "typescript": {
+    "semiColons": "asi",
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "useTabs": false,
+    "quoteStyle": "alwaysDouble",
+    "nextControlFlowPosition": "nextLine",
+    "operatorPosition": "sameLine",
+    "module.sortImportDeclarations": "maintain",
+    "exportDeclaration.sortNamedExports": "maintain",
+    "quoteProps": "asNeeded"
+  },
+  "excludes": [
+    "**/node_modules"
+  ],
+  "includes": [
+    "./js/**/*.{ts,js}"
+  ],
+  "plugins": [
+    "https://plugins.dprint.dev/typescript-0.87.1.wasm"
+  ]
+}

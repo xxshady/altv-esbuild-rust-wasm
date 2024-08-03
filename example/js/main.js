@@ -28,11 +28,11 @@ const exports = loadWasm({
 })
 resource_instance = new Resource(exports)
 
-resource_instance.call_export('main')
-resource_instance.call_export('test_altv_events')
+resource_instance.call_export("main")
+resource_instance.call_export("test_altv_events")
 
 resource_instance.add_timer(altShared.everyTick(() => {
-  resource_instance.call_export('on_every_tick')
+  resource_instance.call_export("on_every_tick")
 }))
 
-resource_instance.call_export('test_base_object')
+resource_instance.call_export("test_base_object")
