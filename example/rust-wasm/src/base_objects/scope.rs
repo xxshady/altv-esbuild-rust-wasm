@@ -28,6 +28,7 @@ impl Scope {
   }
 }
 
+/// Immediately called closure with new scope
 pub fn new_scope<R>(use_scope: impl for<'scope> FnOnce(&'scope Scope) -> R) -> R {
   use_scope(&Scope::default())
 }

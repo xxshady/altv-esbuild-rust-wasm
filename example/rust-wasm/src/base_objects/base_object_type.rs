@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use wasm_bindgen::convert::IntoWasmAbi;
 
 // TODO: generate it from sdk or TS typings
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Serialize_repr, Deserialize_repr, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub(crate) enum BaseObjectType {
   PLAYER,

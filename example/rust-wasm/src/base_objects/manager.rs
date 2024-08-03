@@ -1,11 +1,11 @@
 use std::cell::RefCell;
 
-use crate::{altv_events, logging::log_warn, BaseObject};
+use crate::{altv_events, log_info, logging::log_warn, BaseObject};
 
 use super::{base_object_type::BaseObjectType, handle::BaseObjectHandle};
 
 thread_local! {
-  pub(crate) static MANAGER_INSTANCE: RefCell<Manager> = RefCell::new(Manager::new());
+  pub(crate) static MANAGER_INSTANCE: RefCell<Manager> = Default::default();
 }
 
 #[derive(Default)]
@@ -14,30 +14,6 @@ pub struct Manager {
 }
 
 impl Manager {
-  pub fn new() -> Self {
-    altv_events::add_handler(altv_events::Handler::baseObjectCreate(Box::new(|ctx| {
-      if !matches!(ctx.base_object.btype, BaseObjectType::PLAYER) {
-        return;
-      }
-
-      MANAGER_INSTANCE.with_borrow_mut(|manager| {
-        manager.on_create(ctx.base_object.clone());
-      });
-    })));
-
-    altv_events::add_handler(altv_events::Handler::baseObjectDestroy(Box::new(|ctx| {
-      if !matches!(ctx.base_object.btype, BaseObjectType::PLAYER) {
-        return;
-      }
-
-      MANAGER_INSTANCE.with_borrow_mut(|manager| {
-        manager.on_destroy(ctx.base_object.clone());
-      });
-    })));
-
-    Manager { instances: vec![] }
-  }
-
   pub fn on_create(&mut self, base_object: BaseObjectHandle) {
     self.instances.push(base_object);
   }
@@ -65,4 +41,20 @@ impl Manager {
   pub fn is_handle_valid(&self, handle: &BaseObjectHandle) -> bool {
     self.instances.iter().any(|el| el == handle)
   }
+}
+
+pub fn init() {
+  log_info("initializing base object manager");
+
+  altv_events::add_handler(altv_events::Handler::baseObjectCreate(Box::new(|ctx| {
+    MANAGER_INSTANCE.with_borrow_mut(|manager| {
+      manager.on_create(ctx.base_object.clone());
+    });
+  })));
+
+  altv_events::add_handler(altv_events::Handler::baseObjectRemove(Box::new(|ctx| {
+    MANAGER_INSTANCE.with_borrow_mut(|manager| {
+      manager.on_destroy(ctx.base_object.clone());
+    });
+  })));
 }

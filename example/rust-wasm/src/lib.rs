@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use async_executor::{spawn_future, EXECUTOR_INSTANCE};
 use base_objects::{base_object_type::BaseObjectType, manager::MANAGER_INSTANCE};
 use js_sys::{Function, Object, Reflect, Uint8Array, WebAssembly};
@@ -28,13 +30,16 @@ extern "C" {
   fn disable_altv_event(event_name: &str);
 
   #[wasm_bindgen]
-  fn get_base_object_ref(id: u32, btype: u8) -> Option<BaseObject>;
+  fn get_base_object_ref(btype: u8, id: u32) -> Option<BaseObject>;
 
   #[derive(Clone)]
   type BaseObject;
 
   #[wasm_bindgen(method, getter)]
   fn id(this: &BaseObject) -> u32;
+
+  #[wasm_bindgen(method)]
+  fn destroy(this: &BaseObject);
 
   #[wasm_bindgen(extends = BaseObject)]
   type WorldObject;
@@ -73,6 +78,8 @@ extern "C" {
 pub fn main() {
   console_error_panic_hook::set_once();
   log_info("start");
+
+  base_objects::manager::init();
 
   // let mut future = None;
 
@@ -116,10 +123,37 @@ pub fn on_every_tick() {
 
 #[wasm_bindgen]
 pub fn test_base_object() {
+  // serverside
   let base_object = Vehicle::new(0x3404691C, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
   log_info(&format!("dimension: {}", base_object.dimension()));
   base_object.set_dimension(123);
   log_info(&format!("dimension: {}", base_object.dimension()));
   log_info(&format!("model: {}", base_object.model() == 0x3404691C));
   log_info(&format!("color: {}", base_object.primaryColor()));
+
+  // clientside
+  mod altv {
+    use super::*;
+    pub use base_objects::{scope::new_scope, vehicle::Vehicle};
+    pub use timers::set_timeout;
+  }
+
+  let unscoped_vehicle = altv::new_scope(|scope| {
+    let vehicle = altv::Vehicle::get_by_id(scope, base_object.id()).unwrap();
+    log_info(&format!("veh: {vehicle:?}"));
+
+    vehicle.unscope()
+  });
+
+  base_object.destroy();
+
+  altv::set_timeout(
+    move |scope| {
+      log_info("1");
+      let try_scope_vehicle = unscoped_vehicle.scope(scope);
+      log_info("2");
+      log_info(&format!("try_scope_vehicle: {try_scope_vehicle:?}"));
+    },
+    Duration::from_secs(1),
+  );
 }

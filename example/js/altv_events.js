@@ -17,6 +17,26 @@ export function enable_altv_event(resource, event_name) {
       consoleCommand: (name, ...args) => {
         resource.call_export("on_altv_event", { consoleCommand: { name, args } })
       },
+      baseObjectCreate: (base_object) => {
+        resource.call_export("on_altv_event", {
+          baseObjectCreate: {
+            base_object: {
+              id: base_object.id,
+              btype: base_object.type,
+            },
+          },
+        })
+      },
+      baseObjectRemove: (base_object) => {
+        resource.call_export("on_altv_event", {
+          baseObjectRemove: {
+            base_object: {
+              id: base_object.id,
+              btype: base_object.type,
+            },
+          },
+        })
+      },
     }
     const handler = handlers[event_name]
     if (!handler) {

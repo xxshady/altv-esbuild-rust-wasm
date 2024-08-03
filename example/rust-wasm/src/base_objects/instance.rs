@@ -7,7 +7,7 @@ use super::{any_instance::AnyBaseObject, handle::BaseObjectHandle, manager::Mana
 #[derive(Clone)]
 pub struct BaseObject<T: Clone> {
   pub(crate) handle: BaseObjectHandle,
-  _type: PhantomData<T>,
+  pub(crate) _type: PhantomData<T>,
   js_ref: JsBaseObjectRef,
 }
 

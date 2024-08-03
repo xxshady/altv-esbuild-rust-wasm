@@ -11,8 +11,8 @@ pub struct BaseObjectHandle {
 
 impl BaseObjectHandle {
   pub(crate) fn as_js_ref(&self) -> crate::BaseObject {
-    let Some(base_object_ref) = crate::get_base_object_ref(self.id, self.btype as u8) else {
-      panic!("Failed to get ref to base object: {self:?}");
+    let Some(base_object_ref) = crate::get_base_object_ref(self.btype as u8, self.id) else {
+      panic!("Expected valid base object: {self:?}");
     };
     base_object_ref
   }

@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use super::{instance::BaseObject, scope::Scope, unscoped_instance::UnscopedBaseObject};
 
 // TODO: add Deref<Target = BaseObject<T>> for this?
@@ -39,5 +41,13 @@ impl<'scope, T: Clone> ScopedBaseObject<'scope, T> {
 
   pub fn unscope(&self) -> UnscopedBaseObject<T> {
     UnscopedBaseObject::new(self.instance.clone())
+  }
+}
+
+impl<'scope, T: Clone> Debug for ScopedBaseObject<'scope, T> {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    let id = self.instance.id();
+    let btype = self.instance._type;
+    write!(f, "ScopedBaseObject {{ id: {id}, type: {btype:?} }}")
   }
 }

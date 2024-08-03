@@ -24,7 +24,7 @@ macro_rules! define_altv_events {
       $( $variant, )+
     }
 
-    const REQUIRED_EVENTS: &[EventType] = &[EventType::baseObjectCreate, EventType::baseObjectDestroy];
+    const REQUIRED_EVENTS: &[EventType] = &[EventType::baseObjectCreate, EventType::baseObjectRemove];
 
     #[derive(Serialize, Deserialize, Debug)]
     pub enum Event {
@@ -92,7 +92,7 @@ define_altv_events!(
     pub args: Vec<String>,
   },
   baseObjectCreate: { pub base_object: BaseObjectHandle },
-  baseObjectDestroy: { pub base_object: BaseObjectHandle },
+  baseObjectRemove: { pub base_object: BaseObjectHandle },
 );
 
 #[wasm_bindgen]

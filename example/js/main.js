@@ -21,6 +21,10 @@ const exports = loadWasm({
   disable_altv_event(event_name) {
     resource_instance.remove_event_handler(event_name)
   },
+  get_base_object_ref(btype, id) {
+    return alt.BaseObject.getByID(btype, id)
+  },
+
   BaseObject: alt.BaseObject,
   WorldObject: alt.WorldObject,
   Entity: alt.Entity,

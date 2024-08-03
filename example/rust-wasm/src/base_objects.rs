@@ -9,3 +9,4 @@ pub mod instance;
 pub mod any_instance;
 pub mod vehicle;
 pub mod scoped_instance;
+pub mod blip;
