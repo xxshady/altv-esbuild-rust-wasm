@@ -24,8 +24,6 @@ macro_rules! define_altv_events {
       $( $variant, )+
     }
 
-    const REQUIRED_EVENTS: &[EventType] = &[EventType::baseObjectCreate, EventType::baseObjectRemove];
-
     #[derive(Serialize, Deserialize, Debug)]
     pub enum Event {
       $( $variant(contexts::$variant), )+
@@ -151,9 +149,7 @@ pub fn remove_handler(handler_id: HandlerId) {
       };
 
       if handlers_map.is_empty() {
-        if !REQUIRED_EVENTS.contains(&handler.event_type()) {
-          disable_altv_event(handler.event_name());
-        }
+        disable_altv_event(handler.event_name());
         remove_map_of_type = Some(*event_type);
       }
 
