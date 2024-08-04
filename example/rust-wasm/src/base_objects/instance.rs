@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
-use crate::BaseObject as JsBaseObjectRef;
+use crate::wasm_imports::BaseObject as JsBaseObjectRef;
 
-use super::{any_instance::AnyBaseObject, handle::BaseObjectHandle, manager::Manager};
+use super::{handle::BaseObjectHandle, manager::Manager};
 
 #[derive(Clone)]
 pub struct BaseObject<T: Clone> {

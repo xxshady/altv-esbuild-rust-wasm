@@ -1,11 +1,6 @@
 use super::{
-  any_instance::{AnyBaseObject},
-  base_object_type::BaseObjectType,
-  handle::BaseObjectHandle,
-  instance::BaseObject,
-  manager::MANAGER_INSTANCE,
-  scope::Scope,
-  scoped_instance::ScopedBaseObject,
+  base_object_type::BaseObjectType, handle::BaseObjectHandle, instance::BaseObject,
+  manager::MANAGER_INSTANCE, scope::Scope, scoped_instance::ScopedBaseObject,
 };
 
 #[derive(Clone)]

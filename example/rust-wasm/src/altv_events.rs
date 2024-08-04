@@ -7,8 +7,8 @@ use std::{
 use crate::{
   async_executor::spawn_future,
   base_objects::handle::BaseObjectHandle,
-  disable_altv_event, enable_altv_event,
-  logging::{log, log_warn},
+  wasm_imports::{disable_altv_event, enable_altv_event},
+  logging::{log_info, log_warn},
   wait::wait,
 };
 use serde::{Deserialize, Serialize};
@@ -95,9 +95,9 @@ define_altv_events!(
 
 #[wasm_bindgen]
 pub fn on_altv_event(event: JsValue) {
-  log!("on_altv_event {event:?}");
+  log_info!("on_altv_event {event:?}");
   let event: Event = from_value(event).unwrap();
-  log!("on_altv_event {event:?}");
+  log_info!("on_altv_event {event:?}");
 
   MANAGER_INSTANCE.with_borrow_mut(|manager| {
     let Some(handlers) = manager.handlers.get_mut(&event.event_type()) else {
@@ -168,8 +168,8 @@ pub fn test_altv_events() {
   let handler_id2_ = {
     let id = handler_id2.clone();
     add_handler(Handler::consoleCommand(Box::new(move |context| {
-      log!("context2: {context:?}");
-      log!("handler_id2: {id:?}");
+      log_info!("context2: {context:?}");
+      log_info!("handler_id2: {id:?}");
 
       if context.name == "kkkk" {
         let id = id.clone();
@@ -180,10 +180,10 @@ pub fn test_altv_events() {
     })))
   };
   handler_id2.replace(Some(handler_id2_));
-  log!("handler_id2: {handler_id2:?}");
+  log_info!("handler_id2: {handler_id2:?}");
 
   let handler_id = add_handler(Handler::consoleCommand(Box::new(|context| {
-    log!("context: {context:?}");
+    log_info!("context: {context:?}");
   })));
 
   MANAGER_INSTANCE.with_borrow(|manager| {
@@ -192,7 +192,7 @@ pub fn test_altv_events() {
 
   spawn_future(async move {
     wait(Duration::from_secs(2)).await;
-    log!("removing handler");
+    log_info!("removing handler");
     remove_handler(handler_id);
     MANAGER_INSTANCE.with_borrow(|manager| {
       assert_eq!(

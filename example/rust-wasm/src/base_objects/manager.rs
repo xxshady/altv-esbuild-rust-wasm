@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 
-use crate::{altv_events, log_info, logging::log_warn, BaseObject};
+use crate::{altv_events, log_info, logging::log_warn};
 
-use super::{base_object_type::BaseObjectType, handle::BaseObjectHandle};
+use super::handle::BaseObjectHandle;
 
 thread_local! {
   pub(crate) static MANAGER_INSTANCE: RefCell<Manager> = Default::default();
@@ -44,7 +44,7 @@ impl Manager {
 }
 
 pub fn init() {
-  log_info("initializing base object manager");
+  log_info!("initializing base object manager");
 
   altv_events::add_handler(altv_events::Handler::baseObjectCreate(Box::new(|ctx| {
     MANAGER_INSTANCE.with_borrow_mut(|manager| {
