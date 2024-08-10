@@ -16,19 +16,24 @@ use super::{instance::BaseObject, scoped_instance::ScopedBaseObject};
 ///   });
 /// });
 /// ```
-#[derive(Default)]
-pub struct Scope {}
-
-impl Scope {
-  pub fn attach_base_object<'scope, T: Clone>(
+pub trait Scope {
+  fn attach_base_object<'scope, T: Clone>(
     &'scope self,
     base_object: BaseObject<T>,
-  ) -> ScopedBaseObject<'scope, T> {
+  ) -> ScopedBaseObject<'scope, T>
+  where
+    Self: Sized,
+  {
     ScopedBaseObject::new(self, base_object)
   }
 }
 
+#[derive(Default)]
+pub struct DefaultScope {}
+
+impl Scope for DefaultScope {}
+
 /// Immediately called closure with new scope
-pub fn new_scope<R>(use_scope: impl for<'scope> FnOnce(&'scope Scope) -> R) -> R {
-  use_scope(&Scope::default())
+pub fn new_scope<R>(use_scope: impl for<'scope> FnOnce(&'scope DefaultScope) -> R) -> R {
+  use_scope(&DefaultScope::default())
 }

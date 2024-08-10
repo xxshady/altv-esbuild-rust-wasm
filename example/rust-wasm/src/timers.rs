@@ -169,7 +169,7 @@ pub fn set_timeout(
 ) -> Timer {
   let mut callback = Some(callback);
   create_timer(
-    Box::new(move || (callback.take().unwrap())(&TimerContext::default())),
+    Box::new(move || (callback.take().unwrap())(&TimerContext(()))),
     duration.as_millis() as u64, // TODO: use Duration
     true,
   )
@@ -180,10 +180,12 @@ pub fn set_interval(
   duration: Duration,
 ) -> Timer {
   create_timer(
-    Box::new(move || callback(&TimerContext::default())),
+    Box::new(move || callback(&TimerContext(()))),
     duration.as_millis() as u64, // TODO: use Duration
     false,
   )
 }
 
-pub type TimerContext = Scope;
+pub struct TimerContext(());
+
+impl Scope for TimerContext {}

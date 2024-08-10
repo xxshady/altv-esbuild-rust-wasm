@@ -1,7 +1,6 @@
 use futures::{
   executor::{LocalPool, LocalSpawner},
   task::LocalSpawnExt,
-  task::SpawnError,
 };
 use std::{cell::RefCell, future::Future};
 

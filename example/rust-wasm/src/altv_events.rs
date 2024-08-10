@@ -7,9 +7,10 @@ use std::{
 use crate::{
   async_executor::spawn_future,
   base_objects::handle::BaseObjectHandle,
-  wasm_imports::{disable_altv_event, enable_altv_event},
+  id_provider::{Id, IdProvider},
   logging::{log_info, log_warn},
   wait::wait,
+  wasm_imports::{disable_altv_event, enable_altv_event},
 };
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::from_value;
@@ -115,12 +116,12 @@ thread_local! {
   static MANAGER_INSTANCE: RefCell<Manager> = Default::default();
 }
 
-type HandlerId = u64;
+type HandlerId = Id;
 
 #[derive(Default)]
 struct Manager {
   handlers: HashMap<EventType, HashMap<HandlerId, Handler>>,
-  handler_id: u64,
+  handler_id_provider: IdProvider,
 }
 
 pub fn add_handler(handler: Handler) -> HandlerId {
@@ -131,10 +132,7 @@ pub fn add_handler(handler: Handler) -> HandlerId {
       enable_altv_event(handler.event_name());
     }
 
-    let id = {
-      instance.handler_id += 1;
-      instance.handler_id
-    };
+    let id = instance.handler_id_provider.next();
     per_type_handlers.insert(id, handler);
     id
   })

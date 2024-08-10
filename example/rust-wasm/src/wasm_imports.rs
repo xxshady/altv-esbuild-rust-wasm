@@ -1,3 +1,4 @@
+use js_sys::ArrayBuffer;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(js_namespace = altv_imports)]
@@ -7,6 +8,9 @@ extern "C" {
 
   #[wasm_bindgen]
   pub fn log_warn(data: &str);
+
+  #[wasm_bindgen]
+  pub fn log_error(data: &str);
 
   // TODO: dont send event as string for better performance
   #[wasm_bindgen]
@@ -56,4 +60,10 @@ extern "C" {
 
   #[wasm_bindgen(method, getter)]
   pub fn primaryColor(this: &Vehicle) -> u8;
+
+  #[wasm_bindgen]
+  pub fn emit_local_event_rust(event_name: &str, buffer: ArrayBuffer);
+
+  #[wasm_bindgen]
+  pub fn emit_local_event_js(event_name: &str, args: JsValue);
 }

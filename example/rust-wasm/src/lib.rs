@@ -5,9 +5,11 @@ use timers::{TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
 use wasm_bindgen::prelude::*;
 
 mod altv_events;
+mod script_events;
 mod async_executor;
 mod logging;
 mod wasm_imports;
+mod id_provider;
 use logging::log_info;
 mod timers;
 mod wait;

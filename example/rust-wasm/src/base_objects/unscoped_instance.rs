@@ -33,7 +33,7 @@ impl<T: Clone> UnscopedBaseObject<T> {
     Self { instance }
   }
 
-  pub fn scope<'scope>(&self, scope: &'scope Scope) -> Option<ScopedBaseObject<'scope, T>> {
+  pub fn scope<'scope>(&self, scope: &'scope impl Scope) -> Option<ScopedBaseObject<'scope, T>> {
     let valid =
       MANAGER_INSTANCE.with_borrow(|manager| manager.is_handle_valid(&self.instance.handle));
 

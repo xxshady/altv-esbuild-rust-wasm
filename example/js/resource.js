@@ -13,6 +13,9 @@ export class Resource {
    */
   base_objects = new Set()
 
+  generic_local_event_handler = null
+  generic_remote_event_handler = null
+
   constructor(exports) {
     this.exports = exports
   }
@@ -44,8 +47,8 @@ export class Resource {
     try {
       this.exports[name](...args)
     }
-    catch {
-      alt.logError(`Export call '${name}' panicked`)
+    catch (e) {
+      alt.logError(`Export call '${name}' panicked:`, e)
       this.drop()
     }
   }
@@ -60,5 +63,9 @@ export class Resource {
     for (const base_object of this.base_objects) {
       base_object.destroy()
     }
+
+    alt.off(this.generic_local_event_handler)
+    // TODO: remote script events
+    // alt.offServer(this.generic_remote_event_handler)
   }
 }

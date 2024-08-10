@@ -27,12 +27,12 @@ use super::{instance::BaseObject, scope::Scope, unscoped_instance::UnscopedBaseO
 /// });
 /// ```
 pub struct ScopedBaseObject<'scope, T: Clone> {
-  _scope: &'scope Scope,
+  _scope: &'scope dyn Scope,
   instance: BaseObject<T>,
 }
 
 impl<'scope, T: Clone> ScopedBaseObject<'scope, T> {
-  pub(crate) fn new(scope: &'scope Scope, instance: BaseObject<T>) -> Self {
+  pub(crate) fn new(scope: &'scope impl Scope, instance: BaseObject<T>) -> Self {
     Self {
       _scope: scope,
       instance,

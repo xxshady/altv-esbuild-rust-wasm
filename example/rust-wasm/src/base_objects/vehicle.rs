@@ -12,7 +12,7 @@ pub type ScopedVehicle<'scope> = ScopedBaseObject<'scope, VehicleType>;
 pub type UnscopedVehicle<'scope> = UnscopedBaseObject<VehicleType>;
 
 impl Vehicle {
-  pub fn get_by_id<'scope>(scope: &'scope Scope, id: u32) -> Option<ScopedVehicle<'scope>> {
+  pub fn get_by_id<'scope>(scope: &'scope impl Scope, id: u32) -> Option<ScopedVehicle<'scope>> {
     MANAGER_INSTANCE.with_borrow(|manager| {
       let vehicle = BaseObject::new_by_handle(
         manager,

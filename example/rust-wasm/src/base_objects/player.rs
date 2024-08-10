@@ -10,7 +10,7 @@ pub type Player = BaseObject<PlayerType>;
 pub type ScopedPlayer<'scope> = ScopedBaseObject<'scope, PlayerType>;
 
 impl Player {
-  pub fn get_by_id<'scope>(scope: &'scope Scope, id: u32) -> Option<ScopedPlayer<'scope>> {
+  pub fn get_by_id<'scope>(scope: &'scope impl Scope, id: u32) -> Option<ScopedPlayer<'scope>> {
     MANAGER_INSTANCE.with_borrow(|manager| {
       let player = BaseObject::new_by_handle(
         manager,

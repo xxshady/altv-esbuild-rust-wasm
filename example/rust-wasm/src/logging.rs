@@ -13,3 +13,11 @@ macro_rules! __log_warn {
   };
 }
 pub use __log_warn as log_warn;
+
+#[macro_export]
+macro_rules! __log_error {
+  ($($arg:tt)*) => {
+    $crate::wasm_imports::log_error(&format!($($arg)*))
+  };
+}
+pub use __log_error as log_error;
