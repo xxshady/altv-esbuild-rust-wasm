@@ -1,4 +1,4 @@
-use super::{instance::BaseObject, scoped_instance::ScopedBaseObject};
+use super::{handle::BaseObjectSpecificHandle, instance::BaseObject, scoped_instance::ScopedBaseObject};
 
 /// Scope where "borrowed" base objects (for example Player or Vehicle) are guaranteed to be valid
 ///
@@ -17,10 +17,10 @@ use super::{instance::BaseObject, scoped_instance::ScopedBaseObject};
 /// });
 /// ```
 pub trait Scope {
-  fn attach_base_object<'scope, T: Clone>(
+  fn attach_base_object<'scope, H: BaseObjectSpecificHandle>(
     &'scope self,
-    base_object: BaseObject<T>,
-  ) -> ScopedBaseObject<'scope, T>
+    base_object: BaseObject<H>,
+  ) -> ScopedBaseObject<'scope, H>
   where
     Self: Sized,
   {

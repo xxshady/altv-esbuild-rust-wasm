@@ -13,7 +13,7 @@ mod id_provider;
 use logging::log_info;
 mod timers;
 mod wait;
-pub mod base_objects;
+mod base_objects;
 
 #[wasm_bindgen]
 pub fn main() {
@@ -36,36 +36,36 @@ pub fn on_every_tick() {
 #[wasm_bindgen]
 pub fn test_base_object() {
   // serverside
-  let base_object = wasm_imports::Vehicle::new(0x3404691C, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-  log_info!("dimension: {}", base_object.dimension());
-  base_object.set_dimension(123);
-  log_info!("dimension: {}", base_object.dimension());
-  log_info!("model: {}", base_object.model() == 0x3404691C);
-  log_info!("color: {}", base_object.primaryColor());
+  // let base_object = wasm_imports::Vehicle::new(0x3404691C, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+  // log_info!("dimension: {}", base_object.dimension());
+  // base_object.set_dimension(123);
+  // log_info!("dimension: {}", base_object.dimension());
+  // log_info!("model: {}", base_object.model() == 0x3404691C);
+  // log_info!("color: {}", base_object.primaryColor());
 
-  // clientside
-  mod altv {
-    use super::*;
-    pub use base_objects::{scope::new_scope, vehicle::Vehicle};
-    pub use timers::set_timeout;
-  }
+  // // clientside
+  // mod altv {
+  //   use super::*;
+  //   pub use base_objects::{scope::new_scope, player::Player};
+  //   pub use timers::set_timeout;
+  // }
 
-  let unscoped_vehicle = altv::new_scope(|scope| {
-    let vehicle = altv::Vehicle::get_by_id(scope, base_object.id()).unwrap();
-    log_info!("veh: {vehicle:?}");
+  // let unscoped_player = altv::new_scope(|scope| {
+  //   let vehicle = altv::Player::get_by_handle(scope, base_object.handle()).unwrap();
+  //   log_info!("veh: {vehicle:?}");
 
-    vehicle.unscope()
-  });
+  //   vehicle.unscope()
+  // });
 
-  base_object.destroy();
+  // base_object.destroy();
 
-  altv::set_timeout(
-    move |scope| {
-      log_info!("1");
-      let try_scope_vehicle = unscoped_vehicle.scope(scope);
-      log_info!("2");
-      log_info!("try_scope_vehicle: {try_scope_vehicle:?}");
-    },
-    Duration::from_secs(1),
-  );
+  // altv::set_timeout(
+  //   move |scope| {
+  //     log_info!("1");
+  //     let try_scope_vehicle = unscoped_player.scope(scope);
+  //     log_info!("2");
+  //     log_info!("try_scope_vehicle: {try_scope_vehicle:?}");
+  //   },
+  //   Duration::from_secs(1),
+  // );
 }

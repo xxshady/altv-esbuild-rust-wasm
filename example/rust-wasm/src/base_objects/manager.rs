@@ -46,15 +46,16 @@ impl Manager {
 pub fn init() {
   log_info!("initializing base object manager");
 
-  altv_events::add_handler(altv_events::Handler::baseObjectCreate(Box::new(|ctx| {
-    MANAGER_INSTANCE.with_borrow_mut(|manager| {
-      manager.on_create(ctx.base_object.clone());
-    });
-  })));
+  // TODO: handle worldObjectStreamIn, gameEntityCreate for different types of instances
+  // altv_events::add_handler(altv_events::Handler::baseObjectCreate(Box::new(|ctx| {
+  //   MANAGER_INSTANCE.with_borrow_mut(|manager| {
+  //     manager.on_create(ctx.base_object.clone());
+  //   });
+  // })));
 
-  altv_events::add_handler(altv_events::Handler::baseObjectRemove(Box::new(|ctx| {
-    MANAGER_INSTANCE.with_borrow_mut(|manager| {
-      manager.on_destroy(ctx.base_object.clone());
-    });
-  })));
+  // altv_events::add_handler(altv_events::Handler::baseObjectRemove(Box::new(|ctx| {
+  //   MANAGER_INSTANCE.with_borrow_mut(|manager| {
+  //     manager.on_destroy(ctx.base_object.clone());
+  //   });
+  // })));
 }

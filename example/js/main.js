@@ -2,6 +2,7 @@ import load_wasm from "../rust-wasm/pkg/rust_wasm_bg.wasm"
 import { enable_altv_event } from "./altv_events.js"
 import { Resource } from "./resource.js"
 import * as script_events from "./script_events.js"
+import "./generation_id.js"
 
 // can be either alt-client or alt-server
 import alt from "alt-server"
@@ -28,11 +29,21 @@ const exports = load_wasm({
     return alt.BaseObject.getByID(btype, id)
   },
   emit_local_event_rust(event_name, buffer) {
-    console.log('emit_local_event_rust', { event_name, buffer });
+    console.log("emit_local_event_rust", { event_name, buffer })
     alt.emit(event_name, buffer)
   },
   emit_local_event_js(event_name, args) {
     alt.emit(event_name, ...args)
+  },
+
+  // returns Vec<PlayerHandle>
+  get_streamed_in_players() {
+    // TODO: use streamedIn
+
+    return alt.Player.all.map(p => ({
+      id: p.id,
+      generation: 0, // TODO: generation
+    }))
   },
 
   BaseObject: alt.BaseObject,
@@ -58,4 +69,3 @@ resource_instance.call_export("test_script_events")
 // alt.emit("test")
 // alt.emit("test", 1, 2, 3)
 // alt.emit("test", 256)
-

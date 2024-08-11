@@ -1,8 +1,11 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, ops::Deref};
 
-use super::{instance::BaseObject, scope::Scope, unscoped_instance::UnscopedBaseObject};
+use crate::base_objects::handle::BaseObjectHandle;
 
-// TODO: add Deref<Target = BaseObject<T>> for this?
+use super::{
+  handle::BaseObjectSpecificHandle, instance::BaseObject, scope::Scope,
+  unscoped_instance::UnscopedBaseObject,
+};
 
 /// Base object instance attached to a [`scope`](super::scope::Scope)
 /// and can only be used while that scope is alive (in other words, *base object is owned by its scope*).
@@ -26,28 +29,42 @@ use super::{instance::BaseObject, scope::Scope, unscoped_instance::UnscopedBaseO
 ///   }, Duration::from_secs(1));
 /// });
 /// ```
-pub struct ScopedBaseObject<'scope, T: Clone> {
+pub struct ScopedBaseObject<'scope, H: BaseObjectSpecificHandle> {
   _scope: &'scope dyn Scope,
-  instance: BaseObject<T>,
+  instance: BaseObject<H>,
 }
 
-impl<'scope, T: Clone> ScopedBaseObject<'scope, T> {
-  pub(crate) fn new(scope: &'scope impl Scope, instance: BaseObject<T>) -> Self {
+impl<'scope, H: BaseObjectSpecificHandle> ScopedBaseObject<'scope, H> {
+  pub(crate) fn new(scope: &'scope impl Scope, instance: BaseObject<H>) -> Self {
     Self {
       _scope: scope,
       instance,
     }
   }
 
-  pub fn unscope(&self) -> UnscopedBaseObject<T> {
+  pub fn unscope(&self) -> UnscopedBaseObject<H> {
     UnscopedBaseObject::new(self.instance.clone())
   }
 }
 
-impl<'scope, T: Clone> Debug for ScopedBaseObject<'scope, T> {
+impl<'scope, H: BaseObjectSpecificHandle> Debug for ScopedBaseObject<'scope, H> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    let id = self.instance.id();
-    let btype = self.instance._type;
-    write!(f, "ScopedBaseObject {{ id: {id}, type: {btype:?} }}")
+    let BaseObjectHandle {
+      id,
+      btype,
+      generation,
+    } = self.instance.handle.to_base();
+    write!(
+      f,
+      "ScopedBaseObject {{ id: {id}, type: {btype:?}, generation: {generation:?} }}"
+    )
+  }
+}
+
+impl<'scope, H: BaseObjectSpecificHandle> Deref for ScopedBaseObject<'scope, H> {
+  type Target = BaseObject<H>;
+
+  fn deref(&self) -> &Self::Target {
+    &self.instance
   }
 }

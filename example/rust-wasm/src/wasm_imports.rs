@@ -27,6 +27,9 @@ extern "C" {
   #[wasm_bindgen(method, getter)]
   pub fn id(this: &BaseObject) -> u32;
 
+  #[wasm_bindgen(method, getter, js_name = "isRemote")]
+  pub fn is_remote(this: &BaseObject) -> bool;
+
   #[wasm_bindgen(method)]
   pub fn destroy(this: &BaseObject);
 
@@ -66,4 +69,8 @@ extern "C" {
 
   #[wasm_bindgen]
   pub fn emit_local_event_js(event_name: &str, args: JsValue);
+
+  // returns Vec<PlayerHandle>
+  #[wasm_bindgen]
+  pub fn get_streamed_in_players() -> JsValue;
 }

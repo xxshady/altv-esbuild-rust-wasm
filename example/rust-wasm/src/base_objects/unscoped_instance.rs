@@ -1,5 +1,6 @@
 use super::{
-  instance::BaseObject, manager::MANAGER_INSTANCE, scope::Scope, scoped_instance::ScopedBaseObject,
+  handle::BaseObjectSpecificHandle, instance::BaseObject, manager::MANAGER_INSTANCE, scope::Scope,
+  scoped_instance::ScopedBaseObject,
 };
 
 /// Detached base object instance, it's not known whether its still valid or not
@@ -24,18 +25,18 @@ use super::{
 ///   }, Duration::from_secs(1));
 /// });
 /// ```
-pub struct UnscopedBaseObject<T: Clone> {
-  instance: BaseObject<T>,
+pub struct UnscopedBaseObject<H: BaseObjectSpecificHandle> {
+  instance: BaseObject<H>,
 }
 
-impl<T: Clone> UnscopedBaseObject<T> {
-  pub(crate) fn new(instance: BaseObject<T>) -> Self {
+impl<H: BaseObjectSpecificHandle> UnscopedBaseObject<H> {
+  pub(crate) fn new(instance: BaseObject<H>) -> Self {
     Self { instance }
   }
 
-  pub fn scope<'scope>(&self, scope: &'scope impl Scope) -> Option<ScopedBaseObject<'scope, T>> {
-    let valid =
-      MANAGER_INSTANCE.with_borrow(|manager| manager.is_handle_valid(&self.instance.handle));
+  pub fn scope<'scope>(&self, scope: &'scope impl Scope) -> Option<ScopedBaseObject<'scope, H>> {
+    let valid = MANAGER_INSTANCE
+      .with_borrow(|manager| manager.is_handle_valid(&self.instance.handle.to_base()));
 
     if valid {
       Some(scope.attach_base_object(self.instance.clone()))

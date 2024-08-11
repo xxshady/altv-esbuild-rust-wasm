@@ -3,7 +3,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 // TODO: generate it from sdk or TS typings
 #[derive(Debug, Serialize_repr, Deserialize_repr, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub(crate) enum BaseObjectType {
+pub enum BaseObjectType {
   PLAYER,
   VEHICLE,
   PED,

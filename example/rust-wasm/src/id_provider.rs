@@ -1,14 +1,20 @@
-#[derive(Eq, Hash, PartialEq, Clone, Copy, Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Eq, Hash, PartialEq, Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Id(u64);
 
 #[derive(Default)]
 pub struct IdProvider {
-  last: u64,
+  current: u64,
 }
 
 impl IdProvider {
+  pub fn current(&self) -> Id {
+    Id(self.current)
+  }
+
   pub fn next(&mut self) -> Id {
-    self.last = self.last.checked_add(1).unwrap();
-    Id(self.last)
+    self.current = self.current.checked_add(1).unwrap();
+    Id(self.current)
   }
 }

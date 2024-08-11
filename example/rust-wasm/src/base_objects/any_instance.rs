@@ -1,6 +1,7 @@
-use super::{player::Player, vehicle::Vehicle};
+use super::{player::Player};
 
 pub enum AnyBaseObject {
   Player(Player),
-  Vehicle(Vehicle),
+  // TODO:
+  // Vehicle(Vehicle),
 }
