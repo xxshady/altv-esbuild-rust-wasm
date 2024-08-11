@@ -15,7 +15,7 @@
     "**/node_modules"
   ],
   "includes": [
-    "./js/**/*.{ts,js}"
+    "./example/js/**/*.{ts,js}"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.87.1.wasm"
