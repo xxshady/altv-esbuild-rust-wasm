@@ -1,0 +1,4 @@
+type = 'rs'
+main = 'server.dll'
+client-type = 'js'
+client-main = 'client.js'

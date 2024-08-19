@@ -4,4 +4,7 @@ dist.js
 target
 /example/rust-wasm/pkg
 /example/package-lock.json
-/example/rust-wasm/server
+/example/rust-wasm/server/*
+!/example/rust-wasm/server/server.toml
+!/example/rust-wasm/server/start.bat
+!/example/rust-wasm/server/resources

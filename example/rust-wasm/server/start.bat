@@ -1,0 +1,1 @@
+cd ..\..\ && npm run build-wasm && npm run build-js && cd rust-wasm/server && copy /Y ..\..\dist.js resources\rust\client.js && cd ..\..\rust-server && cargo build && cd ../rust-wasm/server && copy /Y ..\..\rust-server\target\debug\rust_server.dll resources\rust\server.dll && altv-server.exe

@@ -1,0 +1,10 @@
+[package]
+name = "rust-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+altv = { features = ["clientside"], path = "../../../altv-rust/altv"}
+
+[lib]
+crate-type = ["cdylib"]

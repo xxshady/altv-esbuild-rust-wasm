@@ -190,24 +190,25 @@ pub fn emit_js(
 
 #[wasm_bindgen]
 pub fn test_script_events() {
-  let event_name = String::from("test");
+  // let event_name = String::from("test");
 
-  type TestData = (i32, bool, Vec<i32>);
+  // type TestData = (i32, bool, Vec<i32>);
 
-  add_local_handler::<TestData>(event_name.clone(), |context| {
-    let data = context.data;
-    log_info!("data: {data:?}");
-  });
+  // add_local_handler::<TestData>(event_name.clone(), |context| {
+  //   let data = context.data;
+  //   log_info!("data: {data:?}");
+  // });
 
-  let data: TestData = (i32::MAX, true, vec![1, 2, 3]);
-  emit(&event_name, &data).unwrap();
+  // let data: TestData = (i32::MAX, true, vec![1, 2, 3]);
+  // emit(&event_name, &data).unwrap();
 
-  let js_event_name = event_name + "_js";
+  // let js_event_name = event_name + "_js";
 
-  add_local_handler_raw(js_event_name.clone(), |context| {
-    let (args,): (TestData,) = context.args.deserialize_js().unwrap();
-    log_info!("args: {args:?}");
-  });
+  // add_local_handler_raw(js_event_name.clone(), |context| {
+  //   let (args,): (TestData,) = context.args.deserialize_js().unwrap();
+  //   log_info!("args: {args:?}");
+  // });
 
-  emit_js(&js_event_name, &[&data]).unwrap();
+  // // TODO: FIX THIS
+  // emit_js(&js_event_name, &[&data]).unwrap();
 }

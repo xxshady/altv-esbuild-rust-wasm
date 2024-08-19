@@ -1,8 +1,5 @@
-import alt from "alt-shared"
-import {
-  get_base_object_generation_id,
-  get_server_base_object_generation_id,
-} from "./generation_id.js"
+import alt from "alt-client"
+import { base_object_handle } from "./helpers.js"
 
 /**
  * @param {import('./resource.js').Resource} resource
@@ -31,47 +28,44 @@ export function enable_altv_event(resource, event_name) {
 
       resource.call_export("on_altv_event", {
         baseObjectCreate: {
-          base_object: {
-            id: base_object.id,
-            btype: base_object.type,
-            generation: get_base_object_generation_id(),
-          },
+          base_object: base_object_handle(base_object),
         },
       })
     },
     baseObjectRemove: (base_object) => {
       resource.call_export("on_altv_event", {
         baseObjectRemove: {
-          base_object: {
-            id: base_object.id,
-            btype: base_object.type,
-            generation: get_base_object_generation_id(),
-          },
+          base_object: base_object_handle(base_object),
         },
       })
     },
     gameEntityCreate: (entity) => {
       resource.call_export("on_altv_event", {
         gameEntityCreate: {
-          entity,
-          generation: entity.isRemote ? get_server_base_object_generation_id(entity) : null,
+          entity: base_object_handle(entity),
         },
       })
     },
     gameEntityDestroy: (entity) => {
-      resource.call_export("on_altv_event", { gameEntityDestroy: { entity } })
+      resource.call_export("on_altv_event", {
+        gameEntityDestroy: {
+          entity: base_object_handle(entity),
+        },
+      })
     },
     worldObjectStreamIn: (world_object) => {
       resource.call_export("on_altv_event", {
         worldObjectStreamIn: {
-          world_object,
-          // virtual entities
-          generation: entity.isRemote ? get_server_base_object_generation_id(entity) : null,
+          world_object: base_object_handle(world_object),
         },
       })
     },
     worldObjectStreamOut: (world_object) => {
-      resource.call_export("on_altv_event", { worldObjectStreamOut: { world_object } })
+      resource.call_export("on_altv_event", {
+        worldObjectStreamOut: {
+          world_object: base_object_handle(world_object),
+        },
+      })
     },
   }
   const handler = handlers[event_name]

@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::from_value;
 
-use crate::{id_provider::Id, wasm_imports};
+use crate::wasm_imports;
 
 use super::{
   base_object_type::BaseObjectType,
-  handle::{BaseObjectHandle, BaseObjectSpecificHandle},
+  handle::{BaseObjectGeneration, BaseObjectHandle, BaseObjectSpecificHandle},
   instance::BaseObject,
   manager::MANAGER_INSTANCE,
   scope::{new_scope, Scope},
@@ -46,13 +46,13 @@ impl Player {
 #[derive(Clone, Copy, Serialize, Deserialize)]
 pub struct PlayerHandle {
   id: u32,
-  generation: Id,
+  generation: BaseObjectGeneration,
 }
 
 impl BaseObjectSpecificHandle for PlayerHandle {
   fn to_base(&self) -> BaseObjectHandle {
     BaseObjectHandle {
-      btype: BaseObjectType::PLAYER,
+      btype: BaseObjectType::Player,
       id: self.id,
       generation: self.generation,
     }

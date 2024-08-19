@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use async_executor::EXECUTOR_INSTANCE;
 use timers::{TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
 use wasm_bindgen::prelude::*;

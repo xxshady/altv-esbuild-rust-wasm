@@ -1,5 +1,4 @@
-// can be either alt-client or alt-server
-import alt from "alt-server"
+import alt from "alt-client"
 
 /**
  * @param {import("./resource.js").Resource} resource

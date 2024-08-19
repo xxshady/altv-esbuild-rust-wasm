@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
   async_executor::spawn_future,
-  base_objects::handle::BaseObjectHandle,
+  base_objects::handle::RawBaseObjectHandle,
   id_provider::{Id, IdProvider},
   logging::{log_info, log_warn},
   wait::wait,
@@ -90,8 +90,12 @@ define_altv_events!(
     pub name: String,
     pub args: Vec<String>,
   },
-  baseObjectCreate: { pub base_object: BaseObjectHandle },
-  baseObjectRemove: { pub base_object: BaseObjectHandle },
+  baseObjectCreate: { pub base_object: RawBaseObjectHandle },
+  baseObjectRemove: { pub base_object: RawBaseObjectHandle },
+  gameEntityCreate: { pub entity: RawBaseObjectHandle },
+  gameEntityDestroy: { pub entity: RawBaseObjectHandle },
+  worldObjectStreamIn: { pub world_object: RawBaseObjectHandle },
+  worldObjectStreamOut: { pub world_object: RawBaseObjectHandle },
 );
 
 #[wasm_bindgen]

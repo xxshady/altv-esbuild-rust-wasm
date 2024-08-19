@@ -8,11 +8,8 @@ build({
   format: "esm",
   entryPoints: ["./js/main.js"],
   outfile: "./dist.js",
-  external: [
-    "alt-shared",
-  ],
   plugins: [
-    altvEsbuild({ mode: 'server', altvEnums: true }),
+    altvEsbuild({ mode: 'client', altvEnums: true }),
     altvEsbuildRustWasm(),
   ],
 })

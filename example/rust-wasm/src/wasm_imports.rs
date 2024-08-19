@@ -19,7 +19,7 @@ extern "C" {
   pub fn disable_altv_event(event_name: &str);
 
   #[wasm_bindgen]
-  pub fn get_base_object_ref(btype: u8, id: u32) -> Option<BaseObject>;
+  pub fn get_base_object_ref(sdk_type: u8, is_remote: bool, id: u32) -> Option<BaseObject>;
 
   #[derive(Clone)]
   pub type BaseObject;

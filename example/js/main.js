@@ -1,11 +1,10 @@
+import alt from "alt-client"
 import load_wasm from "../rust-wasm/pkg/rust_wasm_bg.wasm"
 import { enable_altv_event } from "./altv_events.js"
 import { Resource } from "./resource.js"
 import * as script_events from "./script_events.js"
 import "./generation_id.js"
-
-// can be either alt-client or alt-server
-import alt from "alt-server"
+import { get_server_base_object_generation_id } from "./generation_id.js"
 
 let resource_instance
 
@@ -25,8 +24,13 @@ const exports = load_wasm({
   disable_altv_event(event_name) {
     resource_instance.remove_event_handler(event_name)
   },
-  get_base_object_ref(btype, id) {
-    return alt.BaseObject.getByID(btype, id)
+  get_base_object_ref(sdk_type, is_remote, id) {
+    if (is_remote) {
+      return alt.BaseObject.getByRemoteID(sdk_type, id)
+    }
+    else {
+      return alt.BaseObject.getByID(sdk_type, id)
+    }
   },
   emit_local_event_rust(event_name, buffer) {
     console.log("emit_local_event_rust", { event_name, buffer })
@@ -42,7 +46,7 @@ const exports = load_wasm({
 
     return alt.Player.all.map(p => ({
       id: p.id,
-      generation: 0, // TODO: generation
+      generation: get_server_base_object_generation_id(p),
     }))
   },
 
