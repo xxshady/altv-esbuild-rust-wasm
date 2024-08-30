@@ -6,6 +6,8 @@ import * as script_events from "./script_events.js"
 import "./generation_id.js"
 import { get_server_base_object_generation_id } from "./generation_id.js"
 
+Error.stackTraceLimit = 100
+
 let resource_instance
 
 const exports = load_wasm({

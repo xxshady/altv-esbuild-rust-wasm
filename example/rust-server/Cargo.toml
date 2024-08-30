@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 altv = { features = ["clientside"], path = "../../../altv-rust/altv"}
+bincode = "=1.3.3"
 
 [lib]
 crate-type = ["cdylib"]

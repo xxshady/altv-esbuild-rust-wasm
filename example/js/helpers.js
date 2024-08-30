@@ -1,4 +1,3 @@
-import alt from "alt-client"
 import {
   get_client_base_object_generation_id,
   get_server_base_object_generation_id,

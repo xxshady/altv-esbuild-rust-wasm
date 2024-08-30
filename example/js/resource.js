@@ -65,7 +65,6 @@ export class Resource {
     }
 
     alt.off(this.generic_local_event_handler)
-    // TODO: remote script events
-    // alt.offServer(this.generic_remote_event_handler)
+    alt.offServer(this.generic_remote_event_handler)
   }
 }
