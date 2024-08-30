@@ -1,6 +1,7 @@
 {
   "rust-analyzer.linkedProjects": [
-    "example/rust-wasm/Cargo.toml"
+    "example/rust-wasm/Cargo.toml",
+    "example/rust-server/Cargo.toml"
   ],
   "window.title": "vscode altv-esbuild-rust-wasm",
   "editor.tabSize": 2,
@@ -8,5 +9,10 @@
     "editor.defaultFormatter": "dprint.dprint",
     "editor.formatOnSave": true
   },
-  "dprint.path": "example/node_modules/@dprint/win32-x64/dprint.exe"
+  "dprint.path": "example/node_modules/@dprint/win32-x64/dprint.exe",
+  "search.exclude": {
+    "example/rust-wasm/target": true,
+    "example/rust-server/target": true,
+    "**/.server-crashes-cache": true
+  }
 }
