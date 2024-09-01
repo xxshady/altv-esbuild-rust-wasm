@@ -5,6 +5,7 @@ import { Resource } from "./resource.js"
 import * as script_events from "./script_events.js"
 import "./generation_id.js"
 import { get_server_base_object_generation_id } from "./generation_id.js"
+import "./sourcemap.js"
 
 Error.stackTraceLimit = 100
 

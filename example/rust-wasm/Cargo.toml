@@ -32,3 +32,6 @@ serde_bytes = "0.11.15"
 # Tell `rustc` to give us best perfomance.
 lto = true
 opt-level = 3
+
+[package.metadata.wasm-pack.profile.dev.wasm-bindgen]
+dwarf-debug-info = true

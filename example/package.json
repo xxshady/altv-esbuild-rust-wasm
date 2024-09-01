@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-wasm": "cd rust-wasm && wasm-pack build --debug --target no-modules",
+    "build-wasm": "cd rust-wasm && wasm-pack build --dev --target no-modules",
+    "generate-sourcemap": "cargo wasm2map rust-wasm/pkg/rust_wasm_bg.wasm",
     "build-js": "node build.js"
   },
   "keywords": [],
@@ -14,7 +15,8 @@
     "altv-esbuild": "^0.7.2",
     "altv-esbuild-rust-wasm": "file:../",
     "dprint": "^0.47.2",
-    "esbuild": "=0.15.3"
+    "esbuild": "=0.15.3",
+    "source-map": "file:./source-map"
   },
   "type": "module"
 }
