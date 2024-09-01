@@ -8,7 +8,7 @@ use super::{
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct BaseObjectGeneration(Id);
+pub(crate) struct BaseObjectGeneration(u64);
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct BaseObjectHandle {
