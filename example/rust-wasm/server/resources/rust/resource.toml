@@ -1,8 +1,0 @@
-type = 'rs'
-main = 'server.dll'
-client-type = 'js'
-client-main = 'client.js'
-client-files = [
-  'wasm.map', # TODO: add to build.js
-  'mappings.wasm' # TODO: add to build.js
-]
