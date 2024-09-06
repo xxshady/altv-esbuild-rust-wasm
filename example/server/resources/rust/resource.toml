@@ -1,0 +1,5 @@
+type = 'rs'
+main = 'server.dll'
+client-type = 'js'
+client-main = 'client/client.js'
+client-files = ['client/*']

@@ -7,4 +7,6 @@ target
 /example/server/*
 !/example/server/server.toml
 !/example/server/start.bat
+!/example/server/resources
+/example/server/resources/rust/*
 !/example/server/resources/rust/resource.toml

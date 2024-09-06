@@ -1,14 +1,11 @@
 import alt from "alt-client"
 import { SourceMapConsumer } from "source-map"
-;(async () => {
-  // TODO: add copy to build.js
-  const sourcemap = alt.File.read("/wasm.map", "utf-8")
 
-  // TODO: add copy to build.js
-  const wasmMappings = alt.File.read("/mappings.wasm", "binary")
+export async function init() {
+  const sourcemap = alt.File.read("/client/wasm.map", "utf-8")
+  const wasmMappings = alt.File.read("/client/mappings.wasm", "binary")
   SourceMapConsumer.initialize({ "lib/mappings.wasm": wasmMappings })
 
-  // TODO: get rid of async?
   const consumer = await new SourceMapConsumer(sourcemap)
 
   Error.prepareStackTrace = (err, frames) => {
@@ -32,4 +29,4 @@ import { SourceMapConsumer } from "source-map"
       )
     }).join("\n")
   }
-})().catch(alt.logError)
+}

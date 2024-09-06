@@ -48,7 +48,11 @@ export class Resource {
       this.exports[name](...args)
     }
     catch (e) {
-      alt.logError(`Export call '${name}' panicked:`, e)
+      alt.logError(
+        `Export call '${name}'`,
+        "\n" + this.exports.get_current_panic_info(),
+        "\n\n" + e.stack.split("\n").slice(1).join("\n"),
+      )
       this.drop()
     }
   }

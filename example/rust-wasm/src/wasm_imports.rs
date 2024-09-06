@@ -74,3 +74,14 @@ extern "C" {
   #[wasm_bindgen]
   pub fn get_streamed_in_players() -> JsValue;
 }
+
+#[wasm_bindgen]
+extern "C" {
+  pub type Error;
+
+  #[wasm_bindgen(constructor)]
+  pub fn new() -> Error;
+
+  #[wasm_bindgen(structural, method, getter)]
+  pub fn stack(error: &Error) -> String;
+}

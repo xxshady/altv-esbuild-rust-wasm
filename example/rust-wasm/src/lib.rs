@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use async_executor::EXECUTOR_INSTANCE;
 use timers::{TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
 use wasm_bindgen::prelude::*;
@@ -8,6 +10,7 @@ mod async_executor;
 mod logging;
 mod wasm_imports;
 mod id_provider;
+mod panic_handler;
 use logging::log_info;
 mod timers;
 mod wait;
@@ -15,7 +18,8 @@ mod base_objects;
 
 #[wasm_bindgen]
 pub fn main() {
-  console_error_panic_hook::set_once();
+  panic_handler::init();
+
   log_info!("start");
 
   base_objects::manager::init();
