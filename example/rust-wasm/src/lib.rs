@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use async_executor::EXECUTOR_INSTANCE;
 use timers::{TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
 use wasm_bindgen::prelude::*;
@@ -11,6 +9,7 @@ mod logging;
 mod wasm_imports;
 mod id_provider;
 mod panic_handler;
+mod result;
 use logging::log_info;
 mod timers;
 mod wait;
