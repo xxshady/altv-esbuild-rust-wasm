@@ -254,6 +254,12 @@ pub fn test_timers() {
         // TODO: backtrace is captured first time as it should, but then its overwritten in IntoVoidResult trait impl
         // TODO: serverside also has this issue?
         let result = Err(MyError)?;
+
+        // TODO: first solution:
+        //   remove Debug impl in AnyError (quite questionable)
+        //   move backtrace to Display
+        //   reuse Display trait in IntoVoidResult impl
+        //   add altv::enable_error_backtrace(bool) (is it really needed if we will have "error_backtrace" feature)
       }
       Ok(())
     },
