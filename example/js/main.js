@@ -74,7 +74,8 @@ async function main() {
   // ----------------------------- testing
 
   // resource_instance.call_export("test_base_object")
-  resource_instance.call_export("test_script_events")
+  // resource_instance.call_export("test_script_events")
+  resource_instance.call_export("test_timers")
 
   // alt.emit("test")
   // alt.emit("test", 1, 2, 3)
