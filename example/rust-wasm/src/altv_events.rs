@@ -128,6 +128,7 @@ struct Manager {
   handler_id_provider: IdProvider,
 }
 
+// TODO: add IntoAnyVoidResult support
 pub fn add_handler(handler: Handler) -> HandlerId {
   MANAGER_INSTANCE.with_borrow_mut(|instance| {
     let per_type_handlers = instance.handlers.entry(handler.event_type()).or_default();

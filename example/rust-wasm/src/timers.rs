@@ -3,9 +3,16 @@ use std::{
   fmt::Debug,
 };
 
+use anyhow::Context;
 use web_time::{Duration, SystemTime};
+use wasm_bindgen::prelude::*;
 
-use crate::base_objects::scope::Scope;
+use crate::{
+  any_error::AnyError,
+  base_objects::scope::Scope,
+  logging::{log_error, log_info},
+  any_void_result::IntoAnyVoidResult,
+};
 
 pub type TimerId = u64;
 pub type TimerCallback = dyn FnMut() + 'static;
@@ -163,24 +170,35 @@ impl Timer {
   }
 }
 
-pub fn set_timeout(
-  callback: impl for<'context> FnOnce(&'context TimerContext) + 'static,
+pub fn set_timeout<R: IntoAnyVoidResult>(
+  callback: impl for<'context> FnOnce(&'context TimerContext) -> R + 'static,
   duration: Duration,
 ) -> Timer {
   let mut callback = Some(callback);
   create_timer(
-    Box::new(move || (callback.take().unwrap())(&TimerContext(()))),
+    Box::new(move || {
+      let callback = callback.take().unwrap();
+      let result = callback(&TimerContext(())).into_any_void_result();
+      if let Err(err) = result {
+        log_error!("set_timeout callback returned an error: {err:?}");
+      }
+    }),
     duration.as_millis() as u64, // TODO: use Duration
     true,
   )
 }
 
-pub fn set_interval(
-  mut callback: impl for<'context> FnMut(&'context TimerContext) + 'static,
+pub fn set_interval<R: IntoAnyVoidResult>(
+  mut callback: impl for<'context> FnMut(&'context TimerContext) -> R + 'static,
   duration: Duration,
 ) -> Timer {
   create_timer(
-    Box::new(move || callback(&TimerContext(()))),
+    Box::new(move || {
+      let result = callback(&TimerContext(())).into_any_void_result();
+      if let Err(err) = result {
+        log_error!("set_interval callback returned an error: {err:?}");
+      }
+    }),
     duration.as_millis() as u64, // TODO: use Duration
     false,
   )
@@ -189,3 +207,13 @@ pub fn set_interval(
 pub struct TimerContext(());
 
 impl Scope for TimerContext {}
+
+#[wasm_bindgen]
+pub fn test_timers() {
+  set_timeout(
+    |_| {
+      log_info!("timeout");
+    },
+    Duration::from_millis(500),
+  );
+}
