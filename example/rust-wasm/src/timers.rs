@@ -3,6 +3,7 @@ use std::{
   fmt::Debug,
 };
 
+use anyhow::Context;
 use web_time::{Duration, SystemTime};
 use wasm_bindgen::prelude::*;
 
@@ -10,7 +11,7 @@ use crate::{
   any_error::AnyError,
   base_objects::scope::Scope,
   logging::{log_error, log_info},
-  result::IntoVoidResult,
+  any_void_result::IntoAnyVoidResult,
 };
 
 pub type TimerId = u64;
@@ -169,7 +170,7 @@ impl Timer {
   }
 }
 
-pub fn set_timeout<R: IntoVoidResult>(
+pub fn set_timeout<R: IntoAnyVoidResult>(
   callback: impl for<'context> FnOnce(&'context TimerContext) -> R + 'static,
   duration: Duration,
 ) -> Timer {
@@ -177,7 +178,7 @@ pub fn set_timeout<R: IntoVoidResult>(
   create_timer(
     Box::new(move || {
       let callback = callback.take().unwrap();
-      let result = callback(&TimerContext(())).into_void_result();
+      let result = callback(&TimerContext(())).into_any_void_result();
       if let Err(err) = result {
         log_error!("set_timeout callback returned an error: {err:?}");
       }
@@ -187,13 +188,13 @@ pub fn set_timeout<R: IntoVoidResult>(
   )
 }
 
-pub fn set_interval<R: IntoVoidResult>(
+pub fn set_interval<R: IntoAnyVoidResult>(
   mut callback: impl for<'context> FnMut(&'context TimerContext) -> R + 'static,
   duration: Duration,
 ) -> Timer {
   create_timer(
     Box::new(move || {
-      let result = callback(&TimerContext(())).into_void_result();
+      let result = callback(&TimerContext(())).into_any_void_result();
       if let Err(err) = result {
         log_error!("set_interval callback returned an error: {err:?}");
       }
@@ -209,60 +210,10 @@ impl Scope for TimerContext {}
 
 #[wasm_bindgen]
 pub fn test_timers() {
-  // set_timeout(
-  //   |_| {
-  //     log_info!("timeout");
-  //   },
-  //   Duration::from_millis(500),
-  // );
-
-  // set_timeout(
-  //   |_| {
-  //     log_info!("timeout 2");
-  //     if true {
-  //       return Err("err");
-  //     }
-  //     Ok(())
-  //   },
-  //   Duration::from_millis(1000),
-  // );
-
-  // set_timeout(
-  //   |_| {
-  //     log_info!("timeout 3");
-  //     if true {
-  //       anyhow::bail!("anyhow error");
-  //     }
-  //     Ok(())
-  //   },
-  //   Duration::from_millis(1500),
-  // );
-
   set_timeout(
-    |_| -> Result<(), AnyError> {
-      log_info!("timeout 4");
-      if true {
-        #[derive(Debug)]
-        struct MyError;
-        impl std::fmt::Display for MyError {
-          fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "MyError")
-          }
-        }
-        impl std::error::Error for MyError {}
-
-        // TODO: backtrace is captured first time as it should, but then its overwritten in IntoVoidResult trait impl
-        // TODO: serverside also has this issue?
-        let result = Err(MyError)?;
-
-        // TODO: first solution:
-        //   remove Debug impl in AnyError (quite questionable)
-        //   move backtrace to Display
-        //   reuse Display trait in IntoVoidResult impl
-        //   add altv::enable_error_backtrace(bool) (is it really needed if we will have "error_backtrace" feature)
-      }
-      Ok(())
+    |_| {
+      log_info!("timeout");
     },
-    Duration::from_millis(2000),
+    Duration::from_millis(500),
   );
 }

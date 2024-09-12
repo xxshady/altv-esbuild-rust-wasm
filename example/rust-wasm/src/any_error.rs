@@ -2,9 +2,23 @@ use std::fmt::{Debug, Display, Formatter};
 
 use crate::{wasm_imports, logging::log_info};
 
-/// Any error, right now it's only needed to provide backtraces (if "error_backtrace" feature is enabled) when returning any error from callbacks (for example from timers).
+/// The Any error type, right now it's only needed to provide backtraces (if "error_backtrace" feature is enabled) when returning any error from callbacks (for example from timers).
 /// Works similarly to [`anyhow::Error`](https://docs.rs/anyhow/latest/anyhow/struct.Error.html).
 /// Use `Display` trait (for example `.to_string()`) to read error message and `Debug` trait to read backtrace (if "error_backtrace" feature is enabled).
+///
+/// # Why not just use anyhow?
+/// Because anyhow doesn't support backtraces in WASM, this error type implements backtraces by using JS `new Error().stack`
+///
+/// # How to use this type with anyhow
+/// You can convert `anyhow::Error` with `.map_err(AnyError::new)` (`?` won't work)
+/// ```
+/// fn error_with_backtrace() -> Result<(), AnyError> {
+///   "".parse::<i32>()
+///     .context("empty string parse failed as it should") // .context method from anyhow
+///     .map_err(AnyError::new)?; // without .map_err we get compilation error
+///   Ok(())
+/// }
+/// ```
 ///
 /// # Examples
 /// ```
@@ -15,6 +29,7 @@ use crate::{wasm_imports, logging::log_info};
 ///   Ok(())
 /// }
 /// ```
+// TODO: better integration with anyhow
 pub struct AnyError {
   message: String,
 
@@ -24,9 +39,20 @@ pub struct AnyError {
 }
 
 impl AnyError {
-  pub fn from_anything<T: Display>(value: T) -> Self {
+  /// Create a new error object from a printable error message.
+  ///
+  /// # Examples
+  /// ```
+  /// fn error_with_backtrace() -> Result<(), AnyError> {
+  ///   let result: Result<(), std::num::ParseIntError> = "".parse::<i32>().map(|_| ());
+  ///   result.map_err(AnyError::new)
+  /// }
+  /// ```
+  #[cold]
+  #[must_use]
+  pub fn new<T: Display>(message: T) -> Self {
     Self {
-      message: value.to_string(),
+      message: message.to_string(),
       // #[cfg(feature = "error_backtrace")]
       backtrace: capture_backtrace(),
     }

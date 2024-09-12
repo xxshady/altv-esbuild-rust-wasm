@@ -1,6 +1,9 @@
 use std::{any::TypeId, borrow::Cow, cell::RefCell, collections::HashMap, time::Duration};
 
-use crate::{async_executor::spawn_future, base_objects::scope::Scope, logging::log_error, wait::wait};
+use crate::{
+  any_void_result::IntoAnyVoidResult, async_executor::spawn_future, base_objects::scope::Scope,
+  logging::log_error, wait::wait,
+};
 
 use js_sys::{ArrayBuffer, Uint8Array};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -158,27 +161,45 @@ fn wrap_handler_with_deserializer<T: DeserializeOwned>(
   }
 }
 
-pub fn add_local_handler_raw(
+pub fn add_local_handler_raw<R>(
   event_name: impl Into<Cow<'static, str>>,
-  handler: impl FnMut(&RawScriptEventContext) + 'static,
-) -> HandlerId {
-  MANAGER_INSTANCE
-    .with_borrow_mut(move |instance| instance.add_handler(EventKind::Local, event_name, handler))
+  mut handler: impl FnMut(&RawScriptEventContext) -> R + 'static,
+) -> HandlerId
+where
+  R: IntoAnyVoidResult,
+{
+  MANAGER_INSTANCE.with_borrow_mut(move |instance| {
+    instance.add_handler(EventKind::Local, event_name, move |context| {
+      let result = handler(context).into_any_void_result();
+      let Err(err) = result else {
+        return;
+      };
+      log_error!("raw local event handler returned an error: {err:?}");
+    })
+  })
 }
 
-pub fn add_local_handler<T: DeserializeOwned + 'static>(
+pub fn add_local_handler<T, R>(
   event_name: impl Into<Cow<'static, str>>,
-  handler: impl FnMut(ScriptEventContext<T>) + 'static,
-) -> HandlerId {
+  mut handler: impl FnMut(ScriptEventContext<T>) -> R + 'static,
+) -> HandlerId
+where
+  T: DeserializeOwned + 'static,
+  R: IntoAnyVoidResult,
+{
   let event_name = event_name.into();
 
-  MANAGER_INSTANCE.with_borrow_mut(move |instance| {
-    instance.add_handler(
-      EventKind::Local,
-      event_name.clone(),
-      wrap_handler_with_deserializer(event_name, handler),
-    )
-  })
+  let handler = move |context| {
+    let result = handler(context).into_any_void_result();
+    let Err(err) = result else {
+      return;
+    };
+    log_error!("local event handler returned an error: {err:?}");
+  };
+  let handler = wrap_handler_with_deserializer(event_name.clone(), handler);
+
+  MANAGER_INSTANCE
+    .with_borrow_mut(move |instance| instance.add_handler(EventKind::Local, event_name, handler))
 }
 
 // TODO:
@@ -186,27 +207,45 @@ pub fn add_local_handler<T: DeserializeOwned + 'static>(
 //   todo!()
 // }
 
-pub fn add_remote_handler_raw(
+pub fn add_remote_handler_raw<R>(
   event_name: impl Into<Cow<'static, str>>,
-  handler: impl FnMut(&RawScriptEventContext) + 'static,
-) -> HandlerId {
-  MANAGER_INSTANCE
-    .with_borrow_mut(move |instance| instance.add_handler(EventKind::Remote, event_name, handler))
+  mut handler: impl FnMut(&RawScriptEventContext) -> R + 'static,
+) -> HandlerId
+where
+  R: IntoAnyVoidResult,
+{
+  MANAGER_INSTANCE.with_borrow_mut(move |instance| {
+    instance.add_handler(EventKind::Remote, event_name, move |context| {
+      let result = handler(context).into_any_void_result();
+      let Err(err) = result else {
+        return;
+      };
+      log_error!("raw remote event handler returned an error: {err:?}");
+    })
+  })
 }
 
-pub fn add_remote_handler<T: DeserializeOwned + 'static>(
+pub fn add_remote_handler<T, R>(
   event_name: impl Into<Cow<'static, str>>,
-  handler: impl FnMut(ScriptEventContext<T>) + 'static,
-) -> HandlerId {
+  mut handler: impl FnMut(ScriptEventContext<T>) -> R + 'static,
+) -> HandlerId
+where
+  T: DeserializeOwned + 'static,
+  R: IntoAnyVoidResult,
+{
   let event_name = event_name.into();
 
-  MANAGER_INSTANCE.with_borrow_mut(move |instance| {
-    instance.add_handler(
-      EventKind::Remote,
-      event_name.clone(),
-      wrap_handler_with_deserializer(event_name, handler),
-    )
-  })
+  let handler = move |context| {
+    let result = handler(context).into_any_void_result();
+    let Err(err) = result else {
+      return;
+    };
+    log_error!("remote event handler returned an error: {err:?}");
+  };
+  let handler = wrap_handler_with_deserializer(event_name.clone(), handler);
+
+  MANAGER_INSTANCE
+    .with_borrow_mut(move |instance| instance.add_handler(EventKind::Remote, event_name, handler))
 }
 
 // TODO:
@@ -244,7 +283,7 @@ pub fn emit_js(
 #[wasm_bindgen]
 pub fn test_script_events() {
   spawn_future(async move {
-    add_remote_handler::<(u8, bool)>("test", |ctx| {
+    add_remote_handler("test", |ctx: ScriptEventContext<(u8, bool)>| {
       log_info!("remote test data: {:?}", ctx.data);
     });
 
@@ -252,10 +291,18 @@ pub fn test_script_events() {
 
     type TestData<'a> = (i32, bool, Vec<i32>);
 
-    add_local_handler::<TestData>(event_name.clone(), |context| {
-      let data = context.data;
-      log_info!("rust data: {data:?}");
-    });
+    add_local_handler(
+      event_name.clone(),
+      |context: ScriptEventContext<TestData>| {
+        log_info!("rust data: {:?}", context.data);
+      },
+    );
+
+    fn _test() {
+      add_local_handler::<i32, _>("test", |context| {
+        log_info!("rust data: {:?}", context.data);
+      });
+    }
 
     let data: TestData = (i32::MAX, true, vec![1, 2, 3]);
     emit(&event_name, &data).unwrap();
