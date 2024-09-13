@@ -2,7 +2,7 @@ use std::{any::TypeId, borrow::Cow, cell::RefCell, collections::HashMap, time::D
 
 use crate::{
   any_void_result::IntoAnyVoidResult, async_executor::spawn_future, base_objects::scope::Scope,
-  logging::log_error, wait::wait,
+  logging::log_error, timers::set_interval, wait::wait,
 };
 
 use js_sys::{ArrayBuffer, Uint8Array};
@@ -62,14 +62,14 @@ pub enum DeserializationError {
   Bincode(bincode::ErrorKind),
 }
 
-pub struct ScriptEventContext<T: DeserializeOwned> {
+pub struct ScriptEventContext<'scope, T: DeserializeOwned> {
   pub data: T,
 
-  /// Disallow creation of this struct from outside
-  _private: (),
+  /// Prevent creation of this struct from outside & moving out of the handler (because it's Scope)
+  _private: &'scope (),
 }
 
-impl<T: DeserializeOwned> Scope for ScriptEventContext<T> {}
+impl<'scope, T: DeserializeOwned> Scope for ScriptEventContext<'scope, T> {}
 
 thread_local! {
   static MANAGER_INSTANCE: RefCell<Manager<'static>> = Default::default();
@@ -152,7 +152,10 @@ fn wrap_handler_with_deserializer<T: DeserializeOwned>(
 ) -> impl FnMut(&RawScriptEventContext) {
   move |context| match context.args.deserialize::<T>() {
     Ok(data) => {
-      let context = ScriptEventContext { data, _private: () };
+      let context = ScriptEventContext {
+        data,
+        _private: &(),
+      };
       handler(context)
     }
     Err(err) => {
@@ -189,14 +192,13 @@ where
 {
   let event_name = event_name.into();
 
-  let handler = move |context| {
+  let handler = wrap_handler_with_deserializer(event_name.clone(), move |context| {
     let result = handler(context).into_any_void_result();
     let Err(err) = result else {
       return;
     };
     log_error!("local event handler returned an error: {err:?}");
-  };
-  let handler = wrap_handler_with_deserializer(event_name.clone(), handler);
+  });
 
   MANAGER_INSTANCE
     .with_borrow_mut(move |instance| instance.add_handler(EventKind::Local, event_name, handler))
@@ -235,14 +237,13 @@ where
 {
   let event_name = event_name.into();
 
-  let handler = move |context| {
+  let handler = wrap_handler_with_deserializer(event_name.clone(), move |context| {
     let result = handler(context).into_any_void_result();
     let Err(err) = result else {
       return;
     };
     log_error!("remote event handler returned an error: {err:?}");
-  };
-  let handler = wrap_handler_with_deserializer(event_name.clone(), handler);
+  });
 
   MANAGER_INSTANCE
     .with_borrow_mut(move |instance| instance.add_handler(EventKind::Remote, event_name, handler))
@@ -283,19 +284,39 @@ pub fn emit_js(
 #[wasm_bindgen]
 pub fn test_script_events() {
   spawn_future(async move {
-    add_remote_handler("test", |ctx: ScriptEventContext<(u8, bool)>| {
-      log_info!("remote test data: {:?}", ctx.data);
-    });
+    // add_remote_handler("test", |ctx: ScriptEventContext<(u8, bool)>| {
+    //   log_info!("remote test data: {:?}", ctx.data);
+    // });
 
     let event_name = String::from("test");
 
     type TestData<'a> = (i32, bool, Vec<i32>);
 
-    add_local_handler(
-      event_name.clone(),
-      |context: ScriptEventContext<TestData>| {
-        log_info!("rust data: {:?}", context.data);
+    let context_: std::rc::Rc<RefCell<Option<ScriptEventContext<(i32, bool, Vec<i32>)>>>> =
+      std::rc::Rc::new(RefCell::new(None));
+
+    add_local_handler(event_name.clone(), {
+      let _context = context_.clone();
+      move |context: ScriptEventContext<TestData>| {
+        // let data = context.data;
+        // log_info!("rust data: {:?}", data);
+
+        // use of moved value as expected
+        // (context.data, context.data);
+
+        // must not be possible because ScriptEventContext is Scope
+        // _context.replace(Some(context));
+      }
+    });
+
+    set_interval(
+      move |_| {
+        let Some(context) = &*context_.borrow() else {
+          return;
+        };
+        log_info!("{:?}", context.data);
       },
+      Duration::from_secs(1),
     );
 
     fn _test() {
