@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{id_provider::Id, wasm_imports};
+use crate::wasm_imports;
 
 use super::{
   base_object_type::{rust_to_sdk_base_object_type, sdk_to_rust_base_object_type, BaseObjectType},

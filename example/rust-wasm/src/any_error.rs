@@ -99,8 +99,5 @@ fn capture_backtrace() -> String {
     .find('\n')
     .expect("js Error stack must include \\n after 'Error'");
   // TODO: avoid .to_string(), tho does it really matter here?
-  let backtrace = js_stack[idx..].to_string();
-  // TEST
-  log_info!("captured backtrace: {backtrace}");
-  backtrace
+  js_stack[idx..].to_string()
 }

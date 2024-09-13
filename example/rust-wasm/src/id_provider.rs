@@ -9,10 +9,6 @@ pub struct IdProvider {
 }
 
 impl IdProvider {
-  pub fn current(&self) -> Id {
-    Id(self.current)
-  }
-
   pub fn next(&mut self) -> Id {
     self.current = self.current.checked_add(1).unwrap();
     Id(self.current)
