@@ -21,3 +21,6 @@ macro_rules! __log_error {
   };
 }
 pub use __log_error as log_error;
+
+custom_print::define_macro!(#[macro_export] cdbg, concat, $crate::wasm_imports::log_info);
+pub use cdbg as dbg;
