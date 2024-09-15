@@ -9,11 +9,11 @@ use super::{
 #[derive(Clone)]
 pub struct BaseObject<H: BaseObjectSpecificHandle> {
   pub(crate) handle: H,
-  js_ref: JsBaseObjectRef,
+  pub(crate) js_ref: JsBaseObjectRef,
 }
 
 impl<H: BaseObjectSpecificHandle> BaseObject<H> {
-  pub fn new_by_handle(manager: &Manager, handle: H) -> Option<Self> {
+  pub(crate) fn new_by_handle(manager: &Manager, handle: H) -> Option<Self> {
     let base_handle = handle.to_base();
     let valid = manager.is_handle_valid(&base_handle);
     if valid {
@@ -24,6 +24,7 @@ impl<H: BaseObjectSpecificHandle> BaseObject<H> {
     }
   }
 
+  /// See [`BaseObjectSpecificHandle`](super::handle::BaseObjectSpecificHandle).
   pub fn handle(&self) -> H {
     self.handle
   }

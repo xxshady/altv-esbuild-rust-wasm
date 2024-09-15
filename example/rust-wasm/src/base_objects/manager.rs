@@ -2,7 +2,6 @@ use std::cell::RefCell;
 
 use crate::{
   altv_events::{self, EventType},
-  base_objects::base_object_type::sdk_to_rust_base_object_type,
   log_info,
   logging::log_warn,
 };

@@ -16,5 +16,5 @@ await build({
 })
 
 fs.copyFileSync("./rust-wasm/pkg/rust_wasm_bg.wasm.map", "./server/resources/rust/client/wasm.map")
-fs.copyFileSync("./rust-server/target/debug/rust_server.dll", "./server/resources/rust/client/server.dll")
+fs.copyFileSync("./rust-server/target/debug/rust_server.dll", "./server/resources/rust/server.dll")
 fs.copyFileSync("./source-map/lib/mappings.wasm", "./server/resources/rust/client/mappings.wasm")

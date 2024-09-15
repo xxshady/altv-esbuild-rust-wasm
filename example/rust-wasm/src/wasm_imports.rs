@@ -73,6 +73,22 @@ extern "C" {
   // returns Vec<PlayerHandle>
   #[wasm_bindgen]
   pub fn get_streamed_in_players() -> JsValue;
+
+  // TODO:
+  // #[wasm_bindgen(extends = Entity)]
+  // pub type Player;
+
+  // #[wasm_bindgen(method, getter)]
+  // pub fn name(this: &Player) -> String;
+
+  #[wasm_bindgen]
+  pub fn get_player_name(obj: &BaseObject) -> String;
+
+  #[wasm_bindgen]
+  pub fn get_entity_model(obj: &BaseObject) -> u32;
+
+  #[wasm_bindgen]
+  pub fn get_net_time() -> u32;
 }
 
 #[wasm_bindgen]

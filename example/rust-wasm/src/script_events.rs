@@ -1,8 +1,15 @@
 use std::{any::TypeId, borrow::Cow, cell::RefCell, collections::HashMap, time::Duration};
 
 use crate::{
-  any_void_result::IntoAnyVoidResult, async_executor::spawn_future, base_objects::scope::Scope,
-  logging::log_error, timers::set_interval, wait::wait,
+  any_void_result::IntoAnyVoidResult,
+  async_executor::spawn_future,
+  base_objects::{
+    handle::BaseObjectSpecificHandle,
+    scope::{new_scope, Scope},
+  },
+  logging::log_error,
+  timers::set_interval,
+  wait::{wait, wait_for},
 };
 
 use js_sys::{ArrayBuffer, Uint8Array};
@@ -134,6 +141,7 @@ pub fn on_script_event(event: JsValue) {
       EventKind::Remote => instance.remote_handlers.get_mut(&event_name),
     };
     let Some(handlers) = handlers else {
+      log_info!("no handlers found for this event");
       return;
     };
 
@@ -284,9 +292,9 @@ pub fn emit_js(
 #[wasm_bindgen]
 pub fn test_script_events() {
   spawn_future(async move {
-    // add_remote_handler("test", |ctx: ScriptEventContext<(u8, bool)>| {
-    //   log_info!("remote test data: {:?}", ctx.data);
-    // });
+    add_remote_handler("test", |ctx: ScriptEventContext<(u8, bool)>| {
+      log_info!("remote test data: {:?}", ctx.data);
+    });
 
     let event_name = String::from("test");
 
@@ -339,4 +347,40 @@ pub fn test_script_events() {
 
     emit_js(&js_event_name, &[&data]).unwrap();
   });
+
+  // use crate::base_objects::player::{PlayerHandle, Player};
+  // fn handler(context: ScriptEventContext<PlayerHandle>) {
+  //   let Some(player) = Player::get_by_handle(&context, context.data) else {
+  //     return;
+  //   };
+  //   log_info!("player.name(): {}", player.name());
+  // }
+  // add_local_handler("deserialize_base_object", handler);
+  // add_remote_handler("deserialize_base_object", handler);
+
+  use crate::base_objects::vehicle::VehicleHandle;
+  fn handler(context: ScriptEventContext<VehicleHandle>) {
+    let vehicle_handle = context.data;
+    spawn_future(async move {
+      let spawned = wait_for(
+        |scope| {
+          let Some(vehicle) = vehicle_handle.attach_to(scope) else {
+            return false;
+          };
+
+          log_info!("spawned vehicle: {}", vehicle.model());
+
+          true
+        },
+        Duration::from_secs(2),
+      )
+      .await;
+      if !*spawned {
+        log_error!("failed to wait for spawn");
+        return;
+      }
+    });
+  }
+  add_local_handler("deserialize_base_object", handler);
+  add_remote_handler("deserialize_base_object", handler);
 }

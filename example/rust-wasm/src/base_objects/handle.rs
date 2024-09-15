@@ -4,16 +4,18 @@ use crate::wasm_imports;
 
 use super::{
   base_object_type::{rust_to_sdk_base_object_type, sdk_to_rust_base_object_type, BaseObjectType},
+  scope::Scope,
+  scoped_instance::ScopedBaseObject,
   sdk_base_object_type::SdkBaseObjectType,
 };
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct BaseObjectGeneration(u64);
+pub type BaseObjectId = u32;
+pub type BaseObjectGeneration = u64;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct BaseObjectHandle {
   pub btype: BaseObjectType,
-  pub id: u32,
+  pub id: BaseObjectId,
   pub generation: BaseObjectGeneration,
 }
 
@@ -29,15 +31,45 @@ impl BaseObjectHandle {
   }
 }
 
+// TODO: make it a struct with generic just like BaseObject?
+/// Identifier of base object, it's not known whether its valid or not
+/// so you can't do anything with it except try to [`attach it`](BaseObjectSpecificHandle::attach_to) to some scope.
+///
+/// # Handle is unique identifier
+/// It's guaranteed that when you try to attach it to some scope it won't give you wrong instance
+/// (for example, in alt:V JS API when you destroy one base object and create another one alt:V reuses ID, thus causing this bug: https://github.com/altmp/altv-js-module/issues/289)
+///
+/// # Examples
+///
+/// ```
+/// altv::events::on_game_entity_create(|one_scope| {
+///   let altv::AnyEntity::Player(player) = one_scope.entity {
+///     return;
+///   };
+///   
+///   // Now you can do whatever you want with it:
+///   // send it over network, store it in a static variable, etc.
+///   let player_handle = player.handle();
+///   
+///   altv::set_timeout(|another_scope| {
+///     let Some(player) = player_handle.attach_to(another_scope) else {
+///       return;
+///     };
+///     dbg!(player);
+///   }, Duration::from_secs(1));
+/// });
+/// ```
 pub trait BaseObjectSpecificHandle: Copy {
-  fn to_base(&self) -> BaseObjectHandle;
+  fn to_base(self) -> BaseObjectHandle;
+  /// Returns `None` if base object behind the handle has been destroyed.
+  fn attach_to<'scope>(self, scope: &'scope impl Scope) -> Option<ScopedBaseObject<'scope, Self>>;
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct RawBaseObjectHandle {
   pub sdk_type: SdkBaseObjectType,
   pub is_remote: bool,
-  pub id: u32,
+  pub id: BaseObjectId,
   pub generation: BaseObjectGeneration,
 }
 

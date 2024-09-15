@@ -2,6 +2,7 @@ use std::{
   cell::{Cell, RefCell},
   collections::HashMap,
   rc::Rc,
+  time::Duration,
 };
 
 use crate::{
@@ -10,12 +11,11 @@ use crate::{
   id_provider::{Id, IdProvider},
   logging::{log_info, log_warn},
   wait::wait,
-  wasm_imports::{disable_altv_event, enable_altv_event},
+  wasm_imports::{self, disable_altv_event, enable_altv_event},
 };
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
-use web_time::Duration;
 
 macro_rules! define_altv_events {
   ( $( $variant:ident: $payload:tt, )+ ) => {
@@ -208,4 +208,17 @@ pub fn test_altv_events() {
       );
     });
   });
+}
+
+#[wasm_bindgen]
+pub fn test_altv_events2() {
+  add_handler(Handler::consoleCommand(Box::new(|context| {
+    if context.name != "net_time" {
+      return;
+    }
+
+    let net_time = Duration::from_millis(wasm_imports::get_net_time().into());
+    log_info!("net time ms: {:?}", net_time.as_millis());
+    log_info!("net time  s: {:?}", net_time.as_secs());
+  })));
 }

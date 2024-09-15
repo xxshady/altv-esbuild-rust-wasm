@@ -1,3 +1,7 @@
+#![deny(clippy::dbg_macro, reason = "use `altv::dbg!` instead")]
+#![deny(clippy::print_stdout, reason = "use `log_info!` instead")]
+#![deny(clippy::print_stderr, reason = "use `log_error!` instead")]
+
 use async_executor::EXECUTOR_INSTANCE;
 use timers::{TIMER_MANAGER_INSTANCE, TIMER_SCHEDULE_INSTANCE};
 use wasm_bindgen::prelude::*;
@@ -11,10 +15,12 @@ mod id_provider;
 mod panic_handler;
 mod any_void_result;
 mod any_error;
-use logging::log_info;
+mod helpers;
 mod timers;
 mod wait;
 mod base_objects;
+
+use logging::log_info;
 
 #[wasm_bindgen]
 pub fn main() {

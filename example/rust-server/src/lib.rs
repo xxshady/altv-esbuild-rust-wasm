@@ -1,4 +1,9 @@
-use altv::BaseObjectPoolFuncs;
+use altv::{
+    meta::{BaseObjectMetaEntry, StreamSyncedEntityMeta},
+    BaseObjectPoolFuncs,
+};
+
+use serde::{Deserialize, Serialize};
 
 #[altv::main]
 fn main() {
@@ -28,12 +33,41 @@ fn main() {
                 new_player(p.clone()).unwrap();
             });
         },
-        500,
+        1000,
     );
 
     fn new_player(p: altv::PlayerContainer) -> altv::VoidResult {
         altv::log!("new player: {}", p.name()?);
-        p.emit("test", &[&bincode::serialize(&(123_i32,))?])?;
+        // p.emit("test", &[&bincode::serialize(&(123_i32,))?])?;
+
+        altv::set_timeout(
+            move || {
+                let veh = altv::Vehicle::new("sultan2", 0, 0).unwrap();
+                altv::log!("created vehicle: {}", veh.id().unwrap());
+
+                p.emit(
+                    "deserialize_base_object",
+                    &[&bincode::serialize(&(AnyHandle {
+                        id: veh.id().unwrap(),
+                        generation: veh
+                            .stream_synced_meta_entry::<u64>("&^#altv-rust")
+                            .unwrap()
+                            .get()
+                            .unwrap()
+                            .unwrap(),
+                    },))?],
+                )?;
+
+                Ok(())
+            },
+            1000,
+        );
         Ok(())
     }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+struct AnyHandle {
+    id: u32,
+    generation: u64,
 }

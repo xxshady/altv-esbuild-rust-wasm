@@ -56,6 +56,20 @@ async function main() {
       }))
     },
 
+    // TEST
+    get_player_name(player) {
+      return player.name
+    },
+
+    // TEST
+    get_entity_model(entity) {
+      return entity.model
+    },
+
+    get_net_time() {
+      return alt.getNetTime()
+    },
+
     BaseObject: alt.BaseObject,
     WorldObject: alt.WorldObject,
     Entity: alt.Entity,
@@ -65,7 +79,7 @@ async function main() {
   script_events.init(resource_instance)
 
   resource_instance.call_export("main")
-  resource_instance.call_export("test_altv_events")
+  // resource_instance.call_export("test_altv_events")
 
   resource_instance.add_timer(alt.everyTick(() => {
     resource_instance.call_export("on_every_tick")
@@ -76,6 +90,8 @@ async function main() {
   // resource_instance.call_export("test_base_object")
   // resource_instance.call_export("test_script_events")
   resource_instance.call_export("test_timers")
+  // resource_instance.call_export("test_timers2")
+  // resource_instance.call_export("test_altv_events2")
 
   // alt.emit("test")
   // alt.emit("test", 1, 2, 3)

@@ -2,15 +2,13 @@ use std::{fmt::Debug, ops::Deref};
 
 use crate::base_objects::handle::BaseObjectHandle;
 
-use super::{
-  handle::BaseObjectSpecificHandle, instance::BaseObject, scope::Scope,
-  unscoped_instance::UnscopedBaseObject,
-};
+use super::{handle::BaseObjectSpecificHandle, instance::BaseObject, scope::Scope};
 
 /// Base object instance attached to a [`scope`](super::scope::Scope)
 /// and can only be used while that scope is alive (in other words, *base object is owned by its scope*).
 ///
-/// The opposite of [`UnscopedInstance`](super::unscoped_instance::UnscopedBaseObject).
+/// See also the [`handle method`](super::instance::BaseObject::handle) for a way to get an owned reference to base object,
+/// which can be passed anywhere and re-attached to some scope.
 ///
 /// # Example
 ///
@@ -40,10 +38,6 @@ impl<'scope, H: BaseObjectSpecificHandle> ScopedBaseObject<'scope, H> {
       _scope: scope,
       instance,
     }
-  }
-
-  pub fn unscope(&self) -> UnscopedBaseObject<H> {
-    UnscopedBaseObject::new(self.instance.clone())
   }
 }
 

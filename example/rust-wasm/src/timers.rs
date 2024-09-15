@@ -1,17 +1,18 @@
 use std::{
   cell::{RefCell, RefMut},
   fmt::Debug,
+  time::Duration,
 };
 
 use anyhow::Context;
-use web_time::{Duration, SystemTime};
 use wasm_bindgen::prelude::*;
 
 use crate::{
   any_error::AnyError,
-  base_objects::scope::Scope,
-  logging::{log_error, log_info},
   any_void_result::IntoAnyVoidResult,
+  base_objects::scope::Scope,
+  helpers::net_time,
+  logging::{log_error, log_info},
 };
 
 pub type TimerId = u64;
@@ -24,7 +25,7 @@ thread_local! {
 
 struct TimerData {
   callback: Box<TimerCallback>,
-  next_call_time: SystemTime,
+  next_call_time: Duration,
   millis: u64,
   once: bool,
   id: TimerId,
@@ -51,7 +52,7 @@ impl ScheduleState {
       self.id
     };
 
-    let next_call_time = SystemTime::now() + Duration::from_millis(millis);
+    let next_call_time = net_time() + Duration::from_millis(millis);
 
     self.timers.push(TimerData {
       callback,
@@ -88,7 +89,7 @@ impl TimerManager {
     drop(schedule); // unborrow ScheduleState
 
     let mut indexes_to_remove: Vec<usize> = vec![];
-    let now = SystemTime::now();
+    let now = net_time();
 
     for (idx, timer) in self.timers.iter_mut().enumerate().rev() {
       if now >= timer.next_call_time {
@@ -98,7 +99,7 @@ impl TimerManager {
           indexes_to_remove.push(idx);
           continue;
         }
-        timer.next_call_time = SystemTime::now() + Duration::from_millis(timer.millis);
+        timer.next_call_time = net_time() + Duration::from_millis(timer.millis);
       }
     }
 
@@ -210,10 +211,19 @@ impl Scope for TimerContext {}
 
 #[wasm_bindgen]
 pub fn test_timers() {
+  log_info!("test_timers");
+
   set_timeout(
     |_| {
       log_info!("timeout");
     },
     Duration::from_millis(500),
+  );
+
+  set_interval(
+    |_| {
+      log_info!("set_interval");
+    },
+    Duration::from_secs(1),
   );
 }
