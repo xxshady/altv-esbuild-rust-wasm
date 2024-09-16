@@ -53,6 +53,11 @@ pub async fn wait_for(
       return false;
     }
 
-    wait(Duration::ZERO).await;
+    next_tick().await;
   }
+}
+
+// TODO: probably needs refactor if we need better perf in loops (see wait_for)
+pub async fn next_tick() {
+  wait(Duration::ZERO).await;
 }
