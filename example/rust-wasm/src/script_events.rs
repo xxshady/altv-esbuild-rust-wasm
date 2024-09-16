@@ -3,7 +3,7 @@ use std::{borrow::Cow, cell::RefCell, collections::HashMap, time::Duration};
 use crate::{
   any_void_result::IntoAnyVoidResult,
   async_executor::spawn_future,
-  base_objects::{handle::BaseObjectSpecificHandle, scope::Scope},
+  base_objects::{handle::BaseObjectHandle, scope::Scope},
   logging::{log_error, log_info, log_warn, dbg},
   timers::set_interval,
   wait::{wait, wait_for},

@@ -1,8 +1,11 @@
 use std::{fmt::Debug, ops::Deref};
 
-use crate::base_objects::handle::BaseObjectHandle;
+use crate::base_objects::handle::GenericBaseObjectHandle;
 
-use super::{handle::BaseObjectSpecificHandle, instance::BaseObject, scope::Scope};
+use super::{
+  as_base_object_type::AsBaseObjectType, handle::BaseObjectHandle, instance::BaseObject,
+  scope::Scope,
+};
 
 /// Base object instance attached to a [`scope`](super::scope::Scope)
 /// and can only be used while that scope is alive (in other words, *base object is owned by its scope*).
@@ -27,13 +30,13 @@ use super::{handle::BaseObjectSpecificHandle, instance::BaseObject, scope::Scope
 ///   }, Duration::from_secs(1));
 /// });
 /// ```
-pub struct ScopedBaseObject<'scope, H: BaseObjectSpecificHandle> {
+pub struct ScopedBaseObject<'scope, T: AsBaseObjectType> {
   _scope: &'scope dyn Scope,
-  instance: BaseObject<H>,
+  instance: BaseObject<T>,
 }
 
-impl<'scope, H: BaseObjectSpecificHandle> ScopedBaseObject<'scope, H> {
-  pub(crate) fn new(scope: &'scope impl Scope, instance: BaseObject<H>) -> Self {
+impl<'scope, T: AsBaseObjectType> ScopedBaseObject<'scope, T> {
+  pub(crate) fn new(scope: &'scope impl Scope, instance: BaseObject<T>) -> Self {
     Self {
       _scope: scope,
       instance,
@@ -41,13 +44,13 @@ impl<'scope, H: BaseObjectSpecificHandle> ScopedBaseObject<'scope, H> {
   }
 }
 
-impl<'scope, H: BaseObjectSpecificHandle> Debug for ScopedBaseObject<'scope, H> {
+impl<'scope, T: AsBaseObjectType> Debug for ScopedBaseObject<'scope, T> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    let BaseObjectHandle {
+    let GenericBaseObjectHandle {
       id,
       btype,
       generation,
-    } = self.instance.handle.to_base();
+    } = self.instance.handle.as_base();
     write!(
       f,
       "ScopedBaseObject {{ id: {id}, type: {btype:?}, generation: {generation:?} }}"
@@ -55,8 +58,8 @@ impl<'scope, H: BaseObjectSpecificHandle> Debug for ScopedBaseObject<'scope, H> 
   }
 }
 
-impl<'scope, H: BaseObjectSpecificHandle> Deref for ScopedBaseObject<'scope, H> {
-  type Target = BaseObject<H>;
+impl<'scope, T: AsBaseObjectType> Deref for ScopedBaseObject<'scope, T> {
+  type Target = BaseObject<T>;
 
   fn deref(&self) -> &Self::Target {
     &self.instance

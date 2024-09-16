@@ -3,16 +3,27 @@ use serde::{Deserialize, Serialize};
 use crate::wasm_imports;
 
 use super::{
+  as_base_object_type::AsBaseObjectType,
   base_object_type::BaseObjectType,
-  handle::{BaseObjectGeneration, BaseObjectHandle, BaseObjectId, BaseObjectSpecificHandle},
+  handle::{BaseObjectGeneration, GenericBaseObjectHandle, BaseObjectId, BaseObjectHandle},
   instance::BaseObject,
   manager::MANAGER_INSTANCE,
   scope::Scope,
   scoped_instance::ScopedBaseObject,
 };
 
-pub type Vehicle = BaseObject<VehicleHandle>;
-pub type ScopedVehicle<'scope> = ScopedBaseObject<'scope, VehicleHandle>;
+pub type Vehicle = BaseObject<VehicleType>;
+pub type ScopedVehicle<'scope> = ScopedBaseObject<'scope, VehicleType>;
+pub type VehicleHandle = BaseObjectHandle<VehicleType>;
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+pub struct VehicleType;
+
+impl AsBaseObjectType for VehicleType {
+  fn as_base_object_type() -> BaseObjectType {
+    BaseObjectType::Vehicle
+  }
+}
 
 impl Vehicle {
   // TODO:
@@ -28,28 +39,5 @@ impl Vehicle {
 
   pub fn model(&self) -> u32 {
     wasm_imports::get_entity_model(&self.js_ref)
-  }
-}
-
-#[derive(Clone, Copy, Serialize, Deserialize)]
-pub struct VehicleHandle {
-  id: BaseObjectId,
-  generation: BaseObjectGeneration,
-}
-
-impl BaseObjectSpecificHandle for VehicleHandle {
-  fn to_base(self) -> BaseObjectHandle {
-    BaseObjectHandle {
-      btype: BaseObjectType::Vehicle,
-      id: self.id,
-      generation: self.generation,
-    }
-  }
-
-  fn attach_to<'scope>(self, scope: &'scope impl Scope) -> Option<ScopedVehicle<'scope>> {
-    MANAGER_INSTANCE.with_borrow(|manager| {
-      let vehicle = BaseObject::new_by_handle(manager, self)?;
-      Some(scope.attach_base_object(vehicle))
-    })
   }
 }

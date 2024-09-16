@@ -6,7 +6,7 @@ use crate::{
   logging::log_warn,
 };
 
-use super::{handle::BaseObjectHandle, base_object_type::BaseObjectType};
+use super::{handle::GenericBaseObjectHandle, base_object_type::BaseObjectType};
 
 thread_local! {
   pub(crate) static MANAGER_INSTANCE: RefCell<Manager> = Default::default();
@@ -14,15 +14,15 @@ thread_local! {
 
 #[derive(Default)]
 pub struct Manager {
-  instances: Vec<BaseObjectHandle>,
+  instances: Vec<GenericBaseObjectHandle>,
 }
 
 impl Manager {
-  pub fn on_create(&mut self, base_object: BaseObjectHandle) {
+  pub fn on_create(&mut self, base_object: GenericBaseObjectHandle) {
     self.instances.push(base_object);
   }
 
-  pub fn on_destroy(&mut self, base_object: BaseObjectHandle) {
+  pub fn on_destroy(&mut self, base_object: GenericBaseObjectHandle) {
     let idx =
       self.instances.iter().enumerate().find_map(
         |(idx, el)| {
@@ -42,7 +42,7 @@ impl Manager {
     self.instances.swap_remove(idx);
   }
 
-  pub fn is_handle_valid(&self, handle: &BaseObjectHandle) -> bool {
+  pub fn is_handle_valid(&self, handle: &GenericBaseObjectHandle) -> bool {
     self.instances.iter().any(|el| el == handle)
   }
 }

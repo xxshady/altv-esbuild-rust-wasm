@@ -1,9 +1,14 @@
+use std::marker::PhantomData;
+
 use serde::{Deserialize, Serialize};
 
 use crate::wasm_imports;
 
 use super::{
+  as_base_object_type::AsBaseObjectType,
   base_object_type::{rust_to_sdk_base_object_type, sdk_to_rust_base_object_type, BaseObjectType},
+  instance::BaseObject,
+  manager::MANAGER_INSTANCE,
   scope::Scope,
   scoped_instance::ScopedBaseObject,
   sdk_base_object_type::SdkBaseObjectType,
@@ -13,13 +18,13 @@ pub type BaseObjectId = u32;
 pub type BaseObjectGeneration = u64;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct BaseObjectHandle {
+pub struct GenericBaseObjectHandle {
   pub btype: BaseObjectType,
   pub id: BaseObjectId,
   pub generation: BaseObjectGeneration,
 }
 
-impl BaseObjectHandle {
+impl GenericBaseObjectHandle {
   pub fn as_js_ref(&self) -> wasm_imports::BaseObject {
     let (sdk_type, is_remote) = rust_to_sdk_base_object_type(self.btype);
     let Some(base_object_ref) =
@@ -31,9 +36,25 @@ impl BaseObjectHandle {
   }
 }
 
-// TODO: make it a struct with generic just like BaseObject?
-/// Identifier of base object, it's not known whether its valid or not
-/// so you can't do anything with it except try to [`attach it`](BaseObjectSpecificHandle::attach_to) to some scope.
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct RawBaseObjectHandle {
+  pub sdk_type: SdkBaseObjectType,
+  pub is_remote: bool,
+  pub id: BaseObjectId,
+  pub generation: BaseObjectGeneration,
+}
+
+impl RawBaseObjectHandle {
+  pub fn as_handle(&self) -> GenericBaseObjectHandle {
+    GenericBaseObjectHandle {
+      btype: sdk_to_rust_base_object_type(self.sdk_type, self.is_remote),
+      id: self.id,
+      generation: self.generation,
+    }
+  }
+}
+
+/// Owned identifier of base object, not attached to any scope.
 ///
 /// # Handle is unique identifier
 /// It's guaranteed that when you try to attach it to some scope it won't give you wrong instance
@@ -59,26 +80,27 @@ impl BaseObjectHandle {
 ///   }, Duration::from_secs(1));
 /// });
 /// ```
-pub trait BaseObjectSpecificHandle: Copy {
-  fn to_base(self) -> BaseObjectHandle;
-  /// Returns `None` if base object behind the handle has been destroyed.
-  fn attach_to<'scope>(self, scope: &'scope impl Scope) -> Option<ScopedBaseObject<'scope, Self>>;
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct BaseObjectHandle<T: AsBaseObjectType> {
+  id: BaseObjectId,
+  generation: BaseObjectGeneration,
+  _t: PhantomData<T>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-pub struct RawBaseObjectHandle {
-  pub sdk_type: SdkBaseObjectType,
-  pub is_remote: bool,
-  pub id: BaseObjectId,
-  pub generation: BaseObjectGeneration,
-}
-
-impl RawBaseObjectHandle {
-  pub fn as_handle(&self) -> BaseObjectHandle {
-    BaseObjectHandle {
-      btype: sdk_to_rust_base_object_type(self.sdk_type, self.is_remote),
+impl<T: AsBaseObjectType> BaseObjectHandle<T> {
+  pub fn as_base(self) -> GenericBaseObjectHandle {
+    GenericBaseObjectHandle {
+      btype: T::as_base_object_type(),
       id: self.id,
       generation: self.generation,
     }
+  }
+
+  /// Returns `None` if base object behind the handle has been destroyed.
+  pub fn attach_to<'scope>(self, scope: &'scope impl Scope) -> Option<ScopedBaseObject<'scope, T>> {
+    MANAGER_INSTANCE.with_borrow(|manager| {
+      let player = BaseObject::new_by_handle(manager, self)?;
+      Some(scope.attach_base_object(player))
+    })
   }
 }

@@ -6,16 +6,27 @@ use serde_wasm_bindgen::from_value;
 use crate::{timers::set_timeout, wasm_imports};
 
 use super::{
+  as_base_object_type::AsBaseObjectType,
   base_object_type::BaseObjectType,
-  handle::{BaseObjectGeneration, BaseObjectHandle, BaseObjectId, BaseObjectSpecificHandle},
+  handle::{BaseObjectGeneration, GenericBaseObjectHandle, BaseObjectId, BaseObjectHandle},
   instance::BaseObject,
   manager::MANAGER_INSTANCE,
   scope::{new_scope, Scope},
   scoped_instance::ScopedBaseObject,
 };
 
-pub type Player = BaseObject<PlayerHandle>;
-pub type ScopedPlayer<'scope> = ScopedBaseObject<'scope, PlayerHandle>;
+pub type Player = BaseObject<PlayerType>;
+pub type ScopedPlayer<'scope> = ScopedBaseObject<'scope, PlayerType>;
+pub type PlayerHandle = BaseObjectHandle<PlayerType>;
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+pub struct PlayerType;
+
+impl AsBaseObjectType for PlayerType {
+  fn as_base_object_type() -> BaseObjectType {
+    BaseObjectType::Player
+  }
+}
 
 impl Player {
   pub fn streamed_in<'scope>(scope: &'scope impl Scope) -> Vec<ScopedPlayer<'scope>> {
@@ -31,29 +42,6 @@ impl Player {
   pub fn name(&self) -> String {
     // TEST
     wasm_imports::get_player_name(&self.js_ref)
-  }
-}
-
-#[derive(Clone, Copy, Serialize, Deserialize)]
-pub struct PlayerHandle {
-  id: BaseObjectId,
-  generation: BaseObjectGeneration,
-}
-
-impl BaseObjectSpecificHandle for PlayerHandle {
-  fn to_base(self) -> BaseObjectHandle {
-    BaseObjectHandle {
-      btype: BaseObjectType::Player,
-      id: self.id,
-      generation: self.generation,
-    }
-  }
-
-  fn attach_to<'scope>(self, scope: &'scope impl Scope) -> Option<ScopedPlayer<'scope>> {
-    MANAGER_INSTANCE.with_borrow(|manager| {
-      let player = BaseObject::new_by_handle(manager, self)?;
-      Some(scope.attach_base_object(player))
-    })
   }
 }
 

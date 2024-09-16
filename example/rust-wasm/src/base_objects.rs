@@ -9,6 +9,7 @@ pub mod instance;
 pub mod any_instance;
 pub mod scoped_instance;
 pub mod vehicle;
+mod as_base_object_type;
 
 // TODO:
 // pub mod blip;
