@@ -1,29 +1,22 @@
-use std::{any::TypeId, borrow::Cow, cell::RefCell, collections::HashMap, time::Duration};
+use std::{borrow::Cow, cell::RefCell, collections::HashMap, time::Duration};
 
 use crate::{
   any_void_result::IntoAnyVoidResult,
   async_executor::spawn_future,
-  base_objects::{
-    handle::BaseObjectSpecificHandle,
-    scope::{new_scope, Scope},
-  },
-  logging::log_error,
+  base_objects::{handle::BaseObjectSpecificHandle, scope::Scope},
+  logging::{log_error, log_info, log_warn, dbg},
   timers::set_interval,
   wait::{wait, wait_for},
+  id_provider::{Id, IdProvider},
+  wasm_imports,
 };
 
-use js_sys::{ArrayBuffer, Uint8Array};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use js_sys::Uint8Array;
+use serde::{de::DeserializeOwned, Deserialize};
 use serde_bytes::ByteBuf;
 use serde_repr::Deserialize_repr;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
-
-use crate::{
-  id_provider::{Id, IdProvider},
-  logging::log_info,
-  wasm_imports,
-};
 
 pub struct RawScriptEventContext {
   args: RawScriptEventArgs,
@@ -141,7 +134,11 @@ pub fn on_script_event(event: JsValue) {
       EventKind::Remote => instance.remote_handlers.get_mut(&event_name),
     };
     let Some(handlers) = handlers else {
-      log_info!("no handlers found for this event");
+      log_warn!(
+        "received {:?} event: '{}', but no handler was set for it",
+        event.source,
+        event_name,
+      );
       return;
     };
 
@@ -368,14 +365,14 @@ pub fn test_script_events() {
             return false;
           };
 
-          log_info!("spawned vehicle: {}", vehicle.model());
+          dbg!(vehicle.model());
 
           true
         },
-        Duration::from_secs(2),
+        Duration::from_millis(5000),
       )
       .await;
-      if !*spawned {
+      if !spawned {
         log_error!("failed to wait for spawn");
         return;
       }

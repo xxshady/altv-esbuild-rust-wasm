@@ -88,8 +88,8 @@ async function main() {
   // ----------------------------- testing
 
   // resource_instance.call_export("test_base_object")
-  // resource_instance.call_export("test_script_events")
-  resource_instance.call_export("test_timers")
+  resource_instance.call_export("test_script_events")
+  // resource_instance.call_export("test_timers")
   // resource_instance.call_export("test_timers2")
   // resource_instance.call_export("test_altv_events2")
 
