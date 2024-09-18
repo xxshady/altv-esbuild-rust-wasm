@@ -19,16 +19,13 @@ use super::{
 ///   });
 /// });
 /// ```
-pub trait Scope {
-  fn attach_base_object<'scope, T: AsBaseObjectType>(
-    &'scope self,
-    base_object: BaseObject<T>,
-  ) -> ScopedBaseObject<'scope, T>
-  where
-    Self: Sized,
-  {
-    ScopedBaseObject::new(self, base_object)
-  }
+pub trait Scope {}
+
+pub fn attach_base_object<'scope, T: AsBaseObjectType>(
+  scope: &'scope dyn Scope,
+  base_object: BaseObject<T>,
+) -> ScopedBaseObject<'scope, T> {
+  ScopedBaseObject::new(scope, base_object)
 }
 
 #[derive(Default)]

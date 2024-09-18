@@ -4,8 +4,15 @@ use crate::wasm_imports;
 
 use super::{
   as_base_object_type::AsBaseObjectType,
+  attached_to_scope::AttachedToScope,
   base_object_type::BaseObjectType,
-  handle::{BaseObjectGeneration, GenericBaseObjectHandle, BaseObjectId, BaseObjectHandle},
+  borrowed_instance::BorrowedBaseObject,
+  class_traits::{
+    self,
+    entity::{Entity, SyncedEntity},
+    world_object::WorldObject,
+  },
+  handle::{BaseObjectGeneration, BaseObjectHandle, BaseObjectId, GenericBaseObjectHandle},
   instance::BaseObject,
   manager::MANAGER_INSTANCE,
   scope::Scope,
@@ -15,6 +22,8 @@ use super::{
 pub type Vehicle = BaseObject<VehicleType>;
 pub type ScopedVehicle<'scope> = ScopedBaseObject<'scope, VehicleType>;
 pub type VehicleHandle = BaseObjectHandle<VehicleType>;
+
+impl BorrowedBaseObject for VehicleHandle {}
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct VehicleType;
@@ -36,8 +45,9 @@ impl Vehicle {
   //     .map(|handle| Self::get_by_handle(scope, handle).unwrap())
   //     .collect()
   // }
-
-  pub fn model(&self) -> u32 {
-    wasm_imports::get_entity_model(&self.js_ref)
-  }
 }
+
+impl<'scope> class_traits::vehicle::Vehicle for ScopedVehicle<'scope> {}
+impl<'scope> WorldObject for ScopedVehicle<'scope> {}
+impl<'scope> Entity for ScopedVehicle<'scope> {}
+impl<'scope> SyncedEntity<'scope> for ScopedVehicle<'scope> {}

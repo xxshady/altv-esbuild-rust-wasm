@@ -1,10 +1,10 @@
 use std::{fmt::Debug, ops::Deref};
 
-use crate::base_objects::handle::GenericBaseObjectHandle;
+use crate::{base_objects::handle::GenericBaseObjectHandle, wasm_imports};
 
 use super::{
-  as_base_object_type::AsBaseObjectType, handle::BaseObjectHandle, instance::BaseObject,
-  scope::Scope,
+  base_object_js_ref::BaseObjectJsRef, as_base_object_type::AsBaseObjectType,
+  attached_to_scope::AttachedToScope, instance::BaseObject, scope::Scope,
 };
 
 /// Base object instance attached to a [`scope`](super::scope::Scope)
@@ -31,16 +31,13 @@ use super::{
 /// });
 /// ```
 pub struct ScopedBaseObject<'scope, T: AsBaseObjectType> {
-  _scope: &'scope dyn Scope,
+  scope: &'scope dyn Scope,
   instance: BaseObject<T>,
 }
 
 impl<'scope, T: AsBaseObjectType> ScopedBaseObject<'scope, T> {
-  pub(crate) fn new(scope: &'scope impl Scope, instance: BaseObject<T>) -> Self {
-    Self {
-      _scope: scope,
-      instance,
-    }
+  pub(crate) fn new(scope: &'scope dyn Scope, instance: BaseObject<T>) -> Self {
+    Self { scope, instance }
   }
 }
 
@@ -50,7 +47,7 @@ impl<'scope, T: AsBaseObjectType> Debug for ScopedBaseObject<'scope, T> {
       id,
       btype,
       generation,
-    } = self.instance.handle.as_base();
+    } = self.instance.handle.as_generic();
     write!(
       f,
       "ScopedBaseObject {{ id: {id}, type: {btype:?}, generation: {generation:?} }}"
@@ -63,5 +60,17 @@ impl<'scope, T: AsBaseObjectType> Deref for ScopedBaseObject<'scope, T> {
 
   fn deref(&self) -> &Self::Target {
     &self.instance
+  }
+}
+
+impl<'scope, T: AsBaseObjectType> AttachedToScope<'scope> for ScopedBaseObject<'scope, T> {
+  fn attached_to_scope(&'scope self) -> &'scope dyn Scope {
+    self.scope
+  }
+}
+
+impl<'scope, T: AsBaseObjectType> BaseObjectJsRef for ScopedBaseObject<'scope, T> {
+  fn js_ref(&self) -> &wasm_imports::BaseObject {
+    &self.js_ref
   }
 }

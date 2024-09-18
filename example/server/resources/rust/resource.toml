@@ -1,5 +1,8 @@
-type = 'rs'
-main = 'server.dll'
-client-type = 'js'
+type = 'jsv2'
+main = 'server.js'
+client-type = 'jsv2'
 client-main = 'client/client.js'
 client-files = ['client/*']
+
+[js-module-v2]
+compatibilityEnabled = true 

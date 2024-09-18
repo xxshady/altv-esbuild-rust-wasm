@@ -33,36 +33,37 @@ extern "C" {
   #[wasm_bindgen(method)]
   pub fn destroy(this: &BaseObject);
 
-  #[wasm_bindgen(extends = BaseObject)]
-  pub type WorldObject;
-
+  // world object
   #[wasm_bindgen(method, getter)]
-  pub fn dimension(this: &WorldObject) -> i32;
+  pub fn pos(this: &BaseObject) -> JsValue;
   #[wasm_bindgen(method, setter)]
-  pub fn set_dimension(this: &WorldObject, value: i32);
-
-  #[wasm_bindgen(extends = WorldObject)]
-  pub type Entity;
+  pub fn set_pos(this: &BaseObject, value: JsValue);
 
   #[wasm_bindgen(method, getter)]
-  pub fn model(this: &Entity) -> u32;
+  pub fn dimension(this: &BaseObject) -> i32;
+  #[wasm_bindgen(method, setter)]
+  pub fn set_dimension(this: &BaseObject, value: i32);
 
-  #[wasm_bindgen(extends = Entity)]
-  pub type Vehicle;
-
-  #[wasm_bindgen(constructor)]
-  pub fn new(
-    model: u32,
-    pos_x: f32,
-    pos_y: f32,
-    pos_z: f32,
-    rot_x: f32,
-    rot_y: f32,
-    rot_z: f32,
-  ) -> Vehicle;
-
+  // entity
   #[wasm_bindgen(method, getter)]
-  pub fn primaryColor(this: &Vehicle) -> u8;
+  pub fn model(this: &BaseObject) -> u32;
+
+  #[wasm_bindgen(method, getter, js_name = "netOwner")]
+  pub fn net_owner(this: &BaseObject) -> Option<BaseObject>;
+
+  // player
+  #[wasm_bindgen(method, getter)]
+  pub fn name(this: &BaseObject) -> String;
+
+  // vehicle
+  #[wasm_bindgen(method, getter, js_name = "fuelLevel")]
+  pub fn fuel_level(this: &BaseObject) -> f32;
+  #[wasm_bindgen(method, setter, js_name = "fuelLevel")]
+  pub fn set_fuel_level(this: &BaseObject, value: f32);
+
+  // local player
+  #[wasm_bindgen(method, getter, js_name = "currentAmmo")]
+  pub fn current_ammo(this: &BaseObject) -> u16;
 
   #[wasm_bindgen]
   pub fn emit_local_event_rust(event_name: &str, buffer: ArrayBuffer);
@@ -74,21 +75,17 @@ extern "C" {
   #[wasm_bindgen]
   pub fn get_streamed_in_players() -> JsValue;
 
-  // TODO:
-  // #[wasm_bindgen(extends = Entity)]
-  // pub type Player;
-
-  // #[wasm_bindgen(method, getter)]
-  // pub fn name(this: &Player) -> String;
-
-  #[wasm_bindgen]
-  pub fn get_player_name(obj: &BaseObject) -> String;
-
-  #[wasm_bindgen]
-  pub fn get_entity_model(obj: &BaseObject) -> u32;
-
   #[wasm_bindgen]
   pub fn get_net_time() -> u32;
+
+  #[wasm_bindgen]
+  pub fn get_base_object_raw_handle(js_ref: &BaseObject) -> JsValue;
+
+  #[wasm_bindgen]
+  pub fn get_local_player() -> BaseObject;
+
+  #[wasm_bindgen]
+  pub fn is_local_player(base_object: &BaseObject) -> bool;
 }
 
 #[wasm_bindgen]

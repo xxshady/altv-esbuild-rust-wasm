@@ -19,6 +19,8 @@ mod helpers;
 mod timers;
 mod wait;
 mod base_objects;
+mod vector;
+mod joaat;
 
 use logging::log_info;
 

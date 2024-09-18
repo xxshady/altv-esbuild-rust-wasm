@@ -40,11 +40,12 @@ export function enable_altv_event(resource, event_name) {
       })
     },
     gameEntityCreate: (entity) => {
-      resource.call_export("on_altv_event", {
-        gameEntityCreate: {
-          entity: base_object_handle(entity),
-        },
-      })
+      // TEST
+      // resource.call_export("on_altv_event", {
+      //   gameEntityCreate: {
+      //     entity: base_object_handle(entity),
+      //   },
+      // })
     },
     gameEntityDestroy: (entity) => {
       resource.call_export("on_altv_event", {

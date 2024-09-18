@@ -8,7 +8,13 @@ use crate::{timers::set_timeout, wasm_imports};
 use super::{
   as_base_object_type::AsBaseObjectType,
   base_object_type::BaseObjectType,
-  handle::{BaseObjectGeneration, GenericBaseObjectHandle, BaseObjectId, BaseObjectHandle},
+  borrowed_instance::BorrowedBaseObject,
+  class_traits::{
+    self,
+    entity::{Entity, SyncedEntity},
+    world_object::WorldObject,
+  },
+  handle::{BaseObjectGeneration, BaseObjectHandle, BaseObjectId, GenericBaseObjectHandle},
   instance::BaseObject,
   manager::MANAGER_INSTANCE,
   scope::{new_scope, Scope},
@@ -18,6 +24,8 @@ use super::{
 pub type Player = BaseObject<PlayerType>;
 pub type ScopedPlayer<'scope> = ScopedBaseObject<'scope, PlayerType>;
 pub type PlayerHandle = BaseObjectHandle<PlayerType>;
+
+impl BorrowedBaseObject for PlayerHandle {}
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct PlayerType;
@@ -38,12 +46,13 @@ impl Player {
       .map(|handle| handle.attach_to(scope).unwrap())
       .collect()
   }
-
-  pub fn name(&self) -> String {
-    // TEST
-    wasm_imports::get_player_name(&self.js_ref)
-  }
 }
+
+impl<'scope> class_traits::player::Player for ScopedPlayer<'scope> {}
+
+impl<'scope> WorldObject for ScopedPlayer<'scope> {}
+impl<'scope> Entity for ScopedPlayer<'scope> {}
+impl<'scope> SyncedEntity<'scope> for ScopedPlayer<'scope> {}
 
 fn _test_player() {
   new_scope(|scope| {

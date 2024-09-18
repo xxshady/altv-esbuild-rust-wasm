@@ -20,6 +20,9 @@ pub struct Manager {
 impl Manager {
   pub fn on_create(&mut self, base_object: GenericBaseObjectHandle) {
     self.instances.push(base_object);
+
+    // TEST
+    crate::logging::dbg!(&self.instances);
   }
 
   pub fn on_destroy(&mut self, base_object: GenericBaseObjectHandle) {
@@ -40,9 +43,14 @@ impl Manager {
     };
 
     self.instances.swap_remove(idx);
+
+    // TEST
+    crate::logging::dbg!(&self.instances);
   }
 
   pub fn is_handle_valid(&self, handle: &GenericBaseObjectHandle) -> bool {
+    // TEST
+    crate::logging::dbg!(&self.instances);
     self.instances.iter().any(|el| el == handle)
   }
 }

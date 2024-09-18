@@ -6,14 +6,21 @@ import * as script_events from "./script_events.js"
 import "./generation_id.js"
 import { get_server_base_object_generation_id } from "./generation_id.js"
 import * as sourcemap from "./sourcemap.js"
+import { base_object_handle } from "./helpers.js"
 
 async function main() {
-  await sourcemap.init()
-
   Error.stackTraceLimit = 100
+
+  // its broken: https://github.com/altmp/altv-js-module-v2/issues/258
+  // and not needed anyway
+  globalThis.TextEncoder = undefined
+
+  await sourcemap.init()
 
   let resource_instance
 
+  // TODO:
+  // bug cause is somewhere here ----------------------------
   const exports = load_wasm({
     log_info(string) {
       alt.log("[rust]", string)
@@ -56,39 +63,39 @@ async function main() {
       }))
     },
 
-    // TEST
-    get_player_name(player) {
-      return player.name
-    },
-
-    // TEST
-    get_entity_model(entity) {
-      return entity.model
-    },
-
     get_net_time() {
       return alt.getNetTime()
     },
 
+    get_base_object_raw_handle(js_ref) {
+      return base_object_handle(js_ref)
+    },
+
+    get_local_player() {
+      return alt.Player.local
+    },
+
+    is_local_player(base_object) {
+      return alt.Player.local === base_object
+    },
+
     BaseObject: alt.BaseObject,
-    WorldObject: alt.WorldObject,
-    Entity: alt.Entity,
-    Vehicle: alt.Vehicle,
   })
   resource_instance = new Resource(exports)
-  script_events.init(resource_instance)
+  // bug cause is somewhere here -------------------------^^^
 
-  resource_instance.call_export("main")
-  // resource_instance.call_export("test_altv_events")
+  // script_events.init(resource_instance)
 
-  resource_instance.add_timer(alt.everyTick(() => {
-    resource_instance.call_export("on_every_tick")
-  }))
+  // resource_instance.call_export("main")
+
+  // resource_instance.add_timer(alt.everyTick(() => {
+  //   resource_instance.call_export("on_every_tick")
+  // }))
 
   // ----------------------------- testing
 
   // resource_instance.call_export("test_base_object")
-  resource_instance.call_export("test_script_events")
+  // resource_instance.call_export("test_script_events")
   // resource_instance.call_export("test_timers")
   // resource_instance.call_export("test_timers2")
   // resource_instance.call_export("test_altv_events2")
@@ -96,6 +103,13 @@ async function main() {
   // alt.emit("test")
   // alt.emit("test", 1, 2, 3)
   // alt.emit("test", 256)
+
+  // TEST
+  alt.on("gameEntityCreate", (obj) => {
+    alt.logWarning("gameEntityCreate", obj, {
+      obj: { handle: base_object_handle(obj) },
+    })
+  })
 }
 
 main().catch(alt.logError)

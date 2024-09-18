@@ -1,6 +1,6 @@
 use altv::{
     meta::{BaseObjectMetaEntry, StreamSyncedEntityMeta},
-    BaseObjectPoolFuncs,
+    BaseObjectPoolFuncs, Entity, WorldObject,
 };
 
 use serde::{Deserialize, Serialize};
@@ -36,22 +36,27 @@ fn main() {
         1000,
     );
 
-    fn new_player(p: altv::PlayerContainer) -> altv::VoidResult {
-        altv::log!("new player: {}", p.name()?);
+    fn new_player(player: altv::PlayerContainer) -> altv::VoidResult {
+        altv::log!("new player: {}", player.name()?);
         // p.emit("test", &[&bincode::serialize(&(123_i32,))?])?;
+
+        player.spawn("mp_f_freemode_01", (0, 0, 71))?;
+
+        altv::Vehicle::all().iter().for_each(|v| {
+            v.set_streamed(false).unwrap();
+        });
 
         altv::set_timeout(
             move || {
-                let veh = altv::Vehicle::new("sultan2", 0, 0).unwrap();
-                altv::log!("created vehicle: {}", veh.id().unwrap());
+                let veh = altv::Vehicle::new("sultan2", player.pos()?, 0)?;
+                altv::log!("created vehicle: {}", veh.id()?);
 
-                p.emit(
+                player.emit(
                     "deserialize_base_object",
                     &[&bincode::serialize(&(AnyHandle {
-                        id: veh.id().unwrap(),
+                        id: veh.id()?,
                         generation: veh
-                            .stream_synced_meta_entry::<u64>("&^#altv-rust")
-                            .unwrap()
+                            .stream_synced_meta_entry("&^#altv-rust")?
                             .get()
                             .unwrap()
                             .unwrap(),
@@ -61,6 +66,16 @@ fn main() {
                 Ok(())
             },
             1000,
+        );
+
+        altv::set_timeout(
+            || {
+                altv::log!("hiding all vehicles");
+                altv::Vehicle::all().iter().for_each(|v| {
+                    v.set_streamed(false).unwrap();
+                });
+            },
+            10_000,
         );
         Ok(())
     }
