@@ -63,6 +63,21 @@ fn main() {
                     },))?],
                 )?;
 
+                let veh = altv::Vehicle::new("sultan2", player.pos()?, 0)?;
+                altv::log!("created vehicle: {}", veh.id()?);
+
+                player.emit(
+                    "deserialize_base_object",
+                    &[&bincode::serialize(&(AnyHandle {
+                        id: veh.id()?,
+                        generation: veh
+                            .stream_synced_meta_entry("&^#altv-rust")?
+                            .get()
+                            .unwrap()
+                            .unwrap(),
+                    },))?],
+                )?;
+
                 Ok(())
             },
             1000,

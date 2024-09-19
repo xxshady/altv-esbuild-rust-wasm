@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "altv"
-version = "16.2.1"
+version = "16.2.2"
 dependencies = [
  "altv_internal_core_resource",
  "altv_internal_resource_main_macro",
@@ -22,7 +22,7 @@ dependencies = [
 
 [[package]]
 name = "altv_internal_core_resource"
-version = "16.2.1"
+version = "16.2.2"
 dependencies = [
  "altv_internal_core_shared",
  "altv_internal_logger",
@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "altv_internal_core_shared"
-version = "16.2.1"
+version = "16.2.2"
 dependencies = [
  "altv_internal_sdk",
  "anyhow",
@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "altv_internal_logger"
-version = "16.2.1"
+version = "16.2.2"
 dependencies = [
  "colored",
  "log",
@@ -55,7 +55,7 @@ dependencies = [
 
 [[package]]
 name = "altv_internal_mvalue"
-version = "16.2.1"
+version = "16.2.2"
 dependencies = [
  "altv_internal_logger",
  "altv_internal_sdk",
@@ -67,7 +67,7 @@ dependencies = [
 
 [[package]]
 name = "altv_internal_resource_main_macro"
-version = "16.2.1"
+version = "16.2.2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -76,7 +76,7 @@ dependencies = [
 
 [[package]]
 name = "altv_internal_sdk"
-version = "16.2.1"
+version = "16.2.2"
 dependencies = [
  "autocxx",
  "autocxx-build",

@@ -1,6 +1,6 @@
 import { build } from "esbuild"
 import { altvEsbuildRustWasm } from "altv-esbuild-rust-wasm"
-import { altvEsbuild } from "altv-esbuild"
+// import { altvEsbuild } from "altv-esbuild"
 import fs from "fs"
 
 await build({
@@ -9,8 +9,12 @@ await build({
   format: "esm",
   entryPoints: ["./js/main.js"],
   outfile: "./server/resources/rust/client/client.js",
+  external: [
+    'alt-client',
+    'natives',
+  ],
   plugins: [
-    altvEsbuild({ mode: 'client', altvEnums: true }),
+    // altvEsbuild({ mode: 'client', altvEnums: true }),
     altvEsbuildRustWasm(),
   ],
 })
