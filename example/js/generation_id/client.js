@@ -10,6 +10,8 @@ alt.on("baseObjectCreate", (base_object) => {
 })
 
 alt.on("baseObjectRemove", () => {
+  if (base_object.isRemote) return
+
   if ((current_generation_id + 1n) > U64_MAX) {
     alt.logError(
       "Client-side base object generation reached u64::MAX.\n" +
