@@ -2,7 +2,6 @@ dist
 node_modules
 target
 /example/rust-wasm/pkg
-/example/package-lock.json
 /example/server/*
 !/example/server/server.toml
 !/example/server/start.bat
