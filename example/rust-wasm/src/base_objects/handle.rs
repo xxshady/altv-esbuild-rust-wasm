@@ -1,15 +1,17 @@
 use std::marker::PhantomData;
 
 use serde::{Deserialize, Serialize};
+use serde_wasm_bindgen::from_value;
 
 use crate::wasm_imports;
 
 use super::{
   as_base_object_type::AsBaseObjectType,
   base_object_type::{rust_to_sdk_base_object_type, sdk_to_rust_base_object_type, BaseObjectType},
+  borrowed_instance::BorrowedBaseObject,
   instance::BaseObject,
   manager::MANAGER_INSTANCE,
-  scope::Scope,
+  scope::{self, Scope},
   scoped_instance::ScopedBaseObject,
   sdk_base_object_type::SdkBaseObjectType,
 };
@@ -25,7 +27,7 @@ pub struct GenericBaseObjectHandle {
 }
 
 impl GenericBaseObjectHandle {
-  pub fn as_js_ref(&self) -> wasm_imports::BaseObject {
+  pub fn js_ref(&self) -> wasm_imports::BaseObject {
     let (sdk_type, is_remote) = rust_to_sdk_base_object_type(self.btype);
     let Some(base_object_ref) =
       wasm_imports::get_base_object_ref(sdk_type as u8, is_remote, self.id)
@@ -84,11 +86,28 @@ impl RawBaseObjectHandle {
 pub struct BaseObjectHandle<T: AsBaseObjectType> {
   id: BaseObjectId,
   generation: BaseObjectGeneration,
+  #[serde(skip_deserializing)]
   _t: PhantomData<T>,
 }
 
 impl<T: AsBaseObjectType> BaseObjectHandle<T> {
-  pub fn as_base(self) -> GenericBaseObjectHandle {
+  pub(crate) fn new(id: BaseObjectId, generation: BaseObjectGeneration) -> Self {
+    Self {
+      id,
+      generation,
+      _t: PhantomData,
+    }
+  }
+
+  pub(crate) fn from_raw_handle(raw_handle: RawBaseObjectHandle) -> Self {
+    Self {
+      id: raw_handle.id,
+      generation: raw_handle.generation,
+      _t: PhantomData,
+    }
+  }
+
+  pub fn as_generic(self) -> GenericBaseObjectHandle {
     GenericBaseObjectHandle {
       btype: T::as_base_object_type(),
       id: self.id,
@@ -97,10 +116,13 @@ impl<T: AsBaseObjectType> BaseObjectHandle<T> {
   }
 
   /// Returns `None` if base object behind the handle has been destroyed.
-  pub fn attach_to<'scope>(self, scope: &'scope impl Scope) -> Option<ScopedBaseObject<'scope, T>> {
+  pub fn attach_to<'scope>(self, scope: &'scope dyn Scope) -> Option<ScopedBaseObject<'scope, T>>
+  where
+    Self: BorrowedBaseObject,
+  {
     MANAGER_INSTANCE.with_borrow(|manager| {
       let player = BaseObject::new_by_handle(manager, self)?;
-      Some(scope.attach_base_object(player))
+      Some(scope::attach_base_object(scope, player))
     })
   }
 }

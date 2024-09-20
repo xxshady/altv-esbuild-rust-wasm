@@ -3,11 +3,14 @@ use std::{borrow::Cow, cell::RefCell, collections::HashMap, time::Duration};
 use crate::{
   any_void_result::IntoAnyVoidResult,
   async_executor::spawn_future,
-  base_objects::{handle::BaseObjectHandle, scope::Scope},
-  logging::{log_error, log_info, log_warn, dbg},
-  timers::set_interval,
-  wait::{wait, wait_for},
+  base_objects::{
+    any_instances::AnyPlayer, class_traits::vehicle::Vehicle, handle::BaseObjectHandle,
+    scope::Scope,
+  },
   id_provider::{Id, IdProvider},
+  logging::{dbg, log_error, log_info, log_warn},
+  timers::{set_interval, set_timeout},
+  wait::{wait, wait_for},
   wasm_imports,
 };
 
@@ -65,7 +68,7 @@ pub enum DeserializationError {
 pub struct ScriptEventContext<'scope, T: DeserializeOwned> {
   pub data: T,
 
-  /// Prevent creation of this struct from outside & moving out of the handler (because it's Scope)
+  /// Prevent creation of this struct from outside and moving out of the handler (because it's Scope)
   _private: &'scope (),
 }
 
@@ -355,17 +358,38 @@ pub fn test_script_events() {
   // add_local_handler("deserialize_base_object", handler);
   // add_remote_handler("deserialize_base_object", handler);
 
-  use crate::base_objects::vehicle::VehicleHandle;
+  use crate::base_objects::{
+    vehicle::VehicleHandle,
+    class_traits::{
+      entity::Entity, world_object::WorldObject, entity::SyncedEntity, player::Player,
+    },
+  };
   fn handler(context: ScriptEventContext<VehicleHandle>) {
     let vehicle_handle = context.data;
     spawn_future(async move {
       let spawned = wait_for(
-        |scope| {
-          let Some(vehicle) = vehicle_handle.attach_to(scope) else {
+        move |scope| {
+          if vehicle_handle.attach_to(scope).is_none() {
             return false;
-          };
+          }
 
-          dbg!(vehicle.model());
+          set_interval(
+            move |scope| {
+              dbg!(vehicle_handle);
+              let vehicle = vehicle_handle.attach_to(scope).unwrap();
+              dbg!(vehicle.net_owner());
+
+              // let Some(net_owner) = vehicle.net_owner() else {
+              //   log_info!("no net owner");
+              //   return;
+              // };
+
+              // wont work
+              // drop(vehicle);
+              // dbg!(net_owner);
+            },
+            Duration::from_secs(1),
+          );
 
           true
         },

@@ -6,11 +6,16 @@ import * as script_events from "./script_events.js"
 import "./generation_id.js"
 import { get_server_base_object_generation_id } from "./generation_id.js"
 import * as sourcemap from "./sourcemap.js"
+import { base_object_handle } from "./helpers.js"
+import { init_created_base_objects } from "./init_created_base_objects.js"
 
 async function main() {
-  await sourcemap.init()
-
   Error.stackTraceLimit = 100
+
+  // TODO: test fix
+  globalThis.TextEncoder = undefined
+
+  await sourcemap.init()
 
   let resource_instance
 
@@ -48,38 +53,44 @@ async function main() {
 
     // returns Vec<PlayerHandle>
     get_streamed_in_players() {
-      // TODO: use streamedIn
-
-      return alt.Player.all.map(p => ({
+      return alt.Player.streamedIn.map(p => ({
         id: p.id,
         generation: get_server_base_object_generation_id(p),
       }))
     },
 
-    // TEST
-    get_player_name(player) {
-      return player.name
-    },
-
-    // TEST
-    get_entity_model(entity) {
-      return entity.model
+    // returns Vec<VehicleHandle>
+    get_streamed_in_vehicles() {
+      return alt.Vehicle.streamedIn.map(v => ({
+        id: v.id,
+        generation: get_server_base_object_generation_id(v),
+      }))
     },
 
     get_net_time() {
       return alt.getNetTime()
     },
 
+    get_base_object_raw_handle(js_ref) {
+      return base_object_handle(js_ref)
+    },
+
+    get_local_player() {
+      return alt.Player.local
+    },
+
+    is_local_player(base_object) {
+      return alt.Player.local === base_object
+    },
+
     BaseObject: alt.BaseObject,
-    WorldObject: alt.WorldObject,
-    Entity: alt.Entity,
-    Vehicle: alt.Vehicle,
   })
   resource_instance = new Resource(exports)
+
   script_events.init(resource_instance)
 
   resource_instance.call_export("main")
-  // resource_instance.call_export("test_altv_events")
+  init_created_base_objects(resource_instance)
 
   resource_instance.add_timer(alt.everyTick(() => {
     resource_instance.call_export("on_every_tick")
@@ -88,10 +99,12 @@ async function main() {
   // ----------------------------- testing
 
   // resource_instance.call_export("test_base_object")
-  resource_instance.call_export("test_script_events")
+  // resource_instance.call_export("test_script_events")
   // resource_instance.call_export("test_timers")
   // resource_instance.call_export("test_timers2")
   // resource_instance.call_export("test_altv_events2")
+  // resource_instance.call_export("test_local_player")
+  resource_instance.call_export("test_vehicle")
 
   // alt.emit("test")
   // alt.emit("test", 1, 2, 3)
