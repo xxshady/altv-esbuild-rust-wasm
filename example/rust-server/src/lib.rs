@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use altv::{
   meta::{BaseObjectMetaEntry, StreamSyncedEntityMeta},
   BaseObjectPoolFuncs, Entity, WorldObject,
@@ -45,14 +47,17 @@ fn main() {
 
         player.emit(
           "deserialize_base_object",
-          &[&bincode::serialize(&(AnyHandle {
-            id: veh.id()?,
-            generation: veh
-              .stream_synced_meta_entry("&^#altv-rust")?
-              .get()
-              .unwrap()
-              .unwrap(),
-          },))?],
+          &[&bincode::serialize(&(AnyBaseObjectHandle::Vehicle(
+            VehicleHandle {
+              id: veh.id()?,
+              generation: veh
+                .stream_synced_meta_entry("&^#altv-rust")?
+                .get()
+                .unwrap()
+                .unwrap(),
+              _t: PhantomData,
+            },
+          ),))?],
         )?;
 
         Ok(())
@@ -83,8 +88,21 @@ fn main() {
   }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
-struct AnyHandle {
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum AnyBaseObjectHandle {
+  Vehicle(VehicleHandle),
+  // Player(PlayerHandle),
+  // LocalPlayer(LocalPlayerHandle),
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct BaseObjectHandle<T> {
   id: u32,
   generation: u64,
+  #[serde(skip_serializing, skip_deserializing)]
+  _t: PhantomData<T>,
 }
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+pub struct VehicleType;
+pub type VehicleHandle = BaseObjectHandle<VehicleType>;

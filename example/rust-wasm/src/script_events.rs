@@ -363,9 +363,13 @@ pub fn test_script_events() {
     class_traits::{
       entity::Entity, world_object::WorldObject, entity::SyncedEntity, player::Player,
     },
+    handle::AnyBaseObjectHandle,
   };
-  fn handler(context: ScriptEventContext<VehicleHandle>) {
-    let vehicle_handle = context.data;
+  fn handler(context: ScriptEventContext<AnyBaseObjectHandle>) {
+    let AnyBaseObjectHandle::Vehicle(vehicle_handle) = context.data else {
+      unreachable!();
+    };
+
     spawn_future(async move {
       let spawned = wait_for(
         move |scope| {

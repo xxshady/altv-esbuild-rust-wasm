@@ -8,6 +8,7 @@ target
 !/example/server/resources
 /example/server/resources/rust/*
 !/example/server/resources/rust/resource.toml
+/example/server/resources/rust-server/*
 !example/server/package.json
 !example/server/package-lock.json
 !example/server/.altvpkgrc.json

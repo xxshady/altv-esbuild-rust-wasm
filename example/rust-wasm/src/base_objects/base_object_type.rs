@@ -5,6 +5,7 @@ use super::sdk_base_object_type::SdkBaseObjectType;
 #[derive(Debug, Serialize_repr, Deserialize_repr, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum BaseObjectType {
+  // keep same order as in sdk enum
   Player,
   Vehicle,
   Ped,

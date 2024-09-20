@@ -53,11 +53,12 @@ pub fn local_player() -> &'static LocalPlayer {
   static INSTANCE: OnceLock<LocalPlayer> = OnceLock::new();
 
   INSTANCE.get_or_init(|| {
-    // TEST
-    crate::logging::log_error!("initializing local player");
+    // hard coded because local player is created from the start and will never be destroyed (it has *static* lifetime)
+    let generation = 1;
 
-    let handle = LocalPlayerHandle::new(1, 1);
-    let instance = LocalPlayer::new(handle, wasm_imports::get_local_player());
+    let js_ref = wasm_imports::get_local_player();
+    let handle = LocalPlayerHandle::new(js_ref.id(), generation);
+    let instance = LocalPlayer::new(handle, js_ref);
 
     MANAGER_INSTANCE.with_borrow_mut(|manager| {
       manager.on_create(handle.as_generic());

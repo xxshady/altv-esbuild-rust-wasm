@@ -10,10 +10,13 @@ use super::{
   base_object_type::{rust_to_sdk_base_object_type, sdk_to_rust_base_object_type, BaseObjectType},
   borrowed_instance::BorrowedBaseObject,
   instance::BaseObject,
+  local_player::LocalPlayerHandle,
   manager::MANAGER_INSTANCE,
+  player::PlayerHandle,
   scope::{self, Scope},
   scoped_instance::ScopedBaseObject,
   sdk_base_object_type::SdkBaseObjectType,
+  vehicle::VehicleHandle,
 };
 
 pub type BaseObjectId = u32;
@@ -86,7 +89,7 @@ impl RawBaseObjectHandle {
 pub struct BaseObjectHandle<T: AsBaseObjectType> {
   id: BaseObjectId,
   generation: BaseObjectGeneration,
-  #[serde(skip_deserializing)]
+  #[serde(skip_serializing, skip_deserializing)]
   _t: PhantomData<T>,
 }
 
@@ -125,4 +128,12 @@ impl<T: AsBaseObjectType> BaseObjectHandle<T> {
       Some(scope::attach_base_object(scope, player))
     })
   }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum AnyBaseObjectHandle {
+  Vehicle(VehicleHandle),
+  Player(PlayerHandle),
+  LocalPlayer(LocalPlayerHandle),
 }
