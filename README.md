@@ -6,7 +6,7 @@ Requirement for building rust to wasm is installed [wasm-pack](https://rustwasm.
 
 ## How to use?
 
-Example resource: [link](/example/).
+Ready-to-use [examples](./examples).
 
 ### Install package via npm
 
@@ -22,7 +22,14 @@ import esbuild from "esbuild"
 esbuild.build({
   // ...
   plugins: [
-    altvEsbuildRustWasm(),
+    altvEsbuildRustWasm({
+      // or "server", depending on where you need to load WASM binary
+      target: "client"
+
+      // absolute path of .wasm file for `alt.File.read`
+      // only needed for clientside
+      wasmPathForClientRead: "/client/rust_wasm_bg.wasm"
+    }),
   ],
 })
 ```
@@ -30,19 +37,18 @@ esbuild.build({
 ### Usage in JS code
 
 ```js
-// generated .wasm file must be in the folder with generated .js file (see example resource)
+// generated .wasm file must be in the folder with generated .js file (see examples)
 import loadWasm from "./pkg/example.wasm"
 
 const {
   // these values are exported from rust
-  // (see example resource)
+  // (see examples)
   ...wasmExports
 } = loadWasm({
   // these values are imported to rust using:
   // #[wasm_bindgen(js_namespace = altv_imports)]
-  // (see example resource)
   ...wasmImports, 
 })
 ```
 
-Rust wasm-bingen documention: [exports](https://rustwasm.github.io/docs/wasm-bindgen/reference/attributes/on-rust-exports/index.html) and [imports](https://rustwasm.github.io/docs/wasm-bindgen/reference/attributes/on-js-imports/index.html).
+See `wasm-bingen` documentation: [exports](https://rustwasm.github.io/docs/wasm-bindgen/reference/attributes/on-rust-exports/index.html) and [imports](https://rustwasm.github.io/docs/wasm-bindgen/reference/attributes/on-js-imports/index.html).

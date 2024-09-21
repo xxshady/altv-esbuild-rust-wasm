@@ -5,14 +5,19 @@ import path from "path"
 import assert from "assert"
 
 export interface Options {
+  target: "client" | "server"
   /**
    * Absolute path of .wasm file for `alt.File.read` (for example `'/client/rust_wasm_bg.wasm'`)
+   *
+   * This option is required if target is "client"
    */
-  wasmPathForClientRead: string
+  wasmPathForClientRead?: string
 }
 
-export const altvEsbuildRustWasm = ({ wasmPathForClientRead }: Options): esbuild.Plugin => {
-  assert.ok(wasmPathForClientRead != null, "Expected wasmPathForClientRead option")
+export const altvEsbuildRustWasm = ({ target, wasmPathForClientRead }: Options): esbuild.Plugin => {
+  assert.ok(target != null, "Expected target option (\"client\" or \"server\")")
+  if (target === "client")
+    assert.ok(wasmPathForClientRead != null, "Expected wasmPathForClientRead option")
 
   return {
     name: PLUGIN_NAME,
@@ -28,13 +33,15 @@ export const altvEsbuildRustWasm = ({ wasmPathForClientRead }: Options): esbuild
       })
 
       build.onLoad({ filter: /.*/, namespace }, ({ path: userPath, pluginData: resolveDir }) => {
-        const wasmPath = path.resolve(resolveDir, userPath)
+        const wasmPath = path.resolve(resolveDir, userPath).replaceAll("\\", "/")
 
-        const outdir = build.initialOptions.outdir
-        assert.ok(outdir != null, "esbuild outdir option must present to copy .wasm to it")
-        const targetWasmPath = path.join(outdir, path.basename(wasmPath))
-        console.log("copying", wasmPath, "->", targetWasmPath)
-        fs.copyFileSync(wasmPath, targetWasmPath)
+        if (target === "client") {
+          const outdir = build.initialOptions.outdir
+          assert.ok(outdir != null, "esbuild outdir option must present to copy .wasm to it (because target is \"client\")")
+          const targetWasmPath = path.join(outdir, path.basename(wasmPath))
+          console.log("copying", wasmPath, "->", targetWasmPath)
+          fs.copyFileSync(wasmPath, targetWasmPath)
+        }
 
         const jsFilePath = path.resolve(
           path.dirname(wasmPath),
@@ -49,7 +56,8 @@ export const altvEsbuildRustWasm = ({ wasmPathForClientRead }: Options): esbuild
           .replace("})();", "")
 
         return {
-          contents: `
+          contents: target === "client"
+            ? `
             import alt from "alt-client";
             const wasmLoader = (altv_imports) => {
               // ------- jsFileContent
@@ -62,6 +70,20 @@ export const altvEsbuildRustWasm = ({ wasmPathForClientRead }: Options): esbuild
               return wasm_bindgen;
             };
             export default wasmLoader;
+          `
+            : `
+              import fs from "fs";
+              const wasmLoader = (altv_imports) => {
+                // ------- jsFileContent
+                ${jsFileContent}
+                // ------- jsFileContent
+
+                const wasmArrayBuffer = fs.readFileSync("${wasmPath}");
+                initSync(wasmArrayBuffer);
+
+                return wasm_bindgen;
+              };
+              export default wasmLoader;
           `,
           loader: "js",
         }
