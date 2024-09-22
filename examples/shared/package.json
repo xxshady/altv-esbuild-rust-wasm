@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build-wasm": "cd rust-wasm && wasm-pack build --release --target no-modules"
+  },
+  "type": "module",
+  "dependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

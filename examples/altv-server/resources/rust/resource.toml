@@ -1,0 +1,7 @@
+type = 'jsv2'
+main = 'server.js'
+client-main = 'client/main.js'
+client-files = ['client/*']
+
+[js-module-v2]
+compatibilityEnabled = true

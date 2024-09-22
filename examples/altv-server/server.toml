@@ -1,0 +1,2 @@
+modules = ['js-module-v2']
+resources = ['rust']

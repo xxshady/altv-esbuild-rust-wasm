@@ -1,6 +1,12 @@
-dist
 node_modules
 dist.js
 pkg
 target
-example/package-lock.json
+examples/altv-server/*
+!examples/altv-server/server.toml
+!examples/altv-server/package*
+!examples/altv-server/.altvpkgrc.json
+examples/altv-server/resources/rust/client/*
+!examples/altv-server/resources/rust/client/.gitkeep
+examples/altv-server/resources/rust/server.js
+!examples/altv-server/resources
