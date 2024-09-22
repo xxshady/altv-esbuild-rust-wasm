@@ -4,8 +4,7 @@
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "files": [
-    "dist/**/*",
-    "text-encoder/**/*"
+    "dist/**/*"
   ],
   "repository": "https://github.com/xxshady/altv-esbuild-rust-wasm",
   "author": "xshady",
