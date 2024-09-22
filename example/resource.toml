@@ -1,3 +1,0 @@
-type = 'js'
-main = 'dist.js'
-client-main = 'dist.js'
