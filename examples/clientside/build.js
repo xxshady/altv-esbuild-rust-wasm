@@ -3,11 +3,14 @@ import { build } from "../shared/build.js"
 
 await build({
   esbuildOptions: {
-    entryPoints: ["../shared/main.js"],
+    entryPoints: ["../shared/run_hello_world.js"],
     outdir: "../altv-server/resources/rust/client",
     external: [
       "alt-shared",
-      "alt-client"
+      "alt-client",
+
+      // wasm js bindings code has conditional import of it
+      "fs/promises"
     ],
   },
   pluginOptions: {

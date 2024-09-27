@@ -1,6 +1,6 @@
 type = 'jsv2'
 main = 'server.js'
-client-main = 'client/main.js'
+client-main = 'client/run_hello_world.js'
 client-files = ['client/*']
 
 [js-module-v2]
